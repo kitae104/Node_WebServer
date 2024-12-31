@@ -24,7 +24,10 @@ const port = 3000;
 //==========================================================================================
 app.use(cors());
 
+app.use(bodyParser.json());                                 // body-parser 미들웨어 등록 
 app.use(bodyParser.urlencoded({ extended: false }));        // body-parser 미들웨어 등록
+
+app.use(express.static(path.join(__dirname, 'public')));    // 정적 파일 미들웨어 등록
 
 app.use(adminRoutes);
 app.use(shopRoutes);
