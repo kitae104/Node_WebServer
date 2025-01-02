@@ -7,10 +7,6 @@ const router = express.Router(); // Router 객체 생성
 const products = []; // 상품 정보를 저장할 배열
 
 router.get('/add-product', (req, res, next) => {
-    res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
-});
-
-/* router.get('/add-product', (req, res, next) => {
 	res.render('add-product', {         // add-product.ejs 렌더링
         pageTitle: 'Add Product',       // 페이지 제목
         path: '/admin/add-product',     // 현재 경로
@@ -18,7 +14,7 @@ router.get('/add-product', (req, res, next) => {
         productCSS: true,               // CSS 파일 적용 여부
         activeAddProduct: true          // 메뉴 활성화 여부
     });
-}); */
+}); 
 
 router.post('/add-product', (req, res, next) => {
 	products.push({ title: req.body.title }); // 상품 정보를 배열에 저장

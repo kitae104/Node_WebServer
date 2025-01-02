@@ -7,11 +7,6 @@ const adminData = require('./admin');
 const router = express.Router(); // Router 객체 생성
 
 router.get('/', (req, res, next) => {
-    console.log('shop.js', adminData.products);
-    res.sendFile(path.join(rootDir, 'views', 'shop.html'));
-});
-
-/* router.get('/', (req, res, next) => {
 	const products = adminData.products;
 	res.render('shop', {
 		prods: products,
@@ -21,6 +16,6 @@ router.get('/', (req, res, next) => {
 		activeShop: true,
 		productCSS: true,
 	});
-}); */
+}); 
 
 module.exports = router; // router 객체를 모듈로 내보냄

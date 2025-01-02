@@ -17,8 +17,8 @@ figlet('Node  Server', function (err, data) {
 const app = express();
 const port = 3000;
 
-// app.set('view engine', 'ejs');                             // ejs 템플릿 엔진 설정
-// app.set('views', 'views');                                 // views 폴더 설정
+app.set('view engine', 'ejs');                             // ejs 템플릿 엔진 설정
+app.set('views', 'views');                                 // views 폴더 설정
 
 const adminData = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -37,8 +37,7 @@ app.use('/admin', adminData.routes);                        // adminData.routes 
 app.use(shopRoutes);
 
 app.use((req, res, next) => {
-	res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
-	// res.status(404).render('404', { pageTitle: 'Page Not Found' });
+	res.status(404).render('404', { pageTitle: 'Page Not Found', path: '' });
 });
 
 app.listen(port, () => {
