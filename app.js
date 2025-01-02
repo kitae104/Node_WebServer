@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const cors = require('cors');
 const path = require('path');
-
+const errorController = require('./controllers/error');
 
 figlet('Node  Server', function (err, data) {
 	if (err) {
@@ -20,7 +20,7 @@ const port = 3000;
 app.set('view engine', 'ejs');                             // ejs 템플릿 엔진 설정
 app.set('views', 'views');                                 // views 폴더 설정
 
-const adminData = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 //==========================================================================================
@@ -33,12 +33,10 @@ app.use(bodyParser.urlencoded({ extended: false }));        // body-parser 미�
 
 app.use(express.static(path.join(__dirname, 'public')));    // 정적 파일 미들웨어 등록
 
-app.use('/admin', adminData.routes);                        // adminData.routes 미들웨어 등록
+app.use('/admin', adminRoutes);                        		// admin 라우터 등록
 app.use(shopRoutes);
 
-app.use((req, res, next) => {
-	res.status(404).render('404', { pageTitle: 'Page Not Found', path: '' });
-});
+app.use(errorController.get404);
 
 app.listen(port, () => {
 	console.log(`http://localhost:${port}`);
