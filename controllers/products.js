@@ -1,4 +1,4 @@
-const products = []; // 상품 정보를 저장할 배열
+const Product = require('../models/product'); // Product 모델 클래스를 가져옴
 
 exports.getAddProduct = (req, res, next) => {
 	res.render('add-product', {         // add-product.ejs 렌더링
@@ -11,11 +11,13 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-	products.push({ title: req.body.title }); // 상품 정보를 배열에 저장
+	const product = new Product(req.body.title); // Product 모델 클래스의 객체 생성
+	product.save(); 							 // 상품 정보를 저장
 	res.redirect('/');
 };
 
 exports.getProducts = (req, res, next) => {
+	const products = Product.fetchAll(); // 모든 상품 정보를 가져옴
 	res.render('shop', {
 		prods: products,
 		pageTitle: 'Shop',
