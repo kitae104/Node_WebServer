@@ -1,1 +1,14 @@
-[{"title":"test"},{"title":"First Book"},{"title":"Second Book"}]
+[
+	{
+		"title": "A Book",
+		"imageUrl": "https://www.booksr.co.kr/wp-content/uploads/2022/01/bookcover_img130-300x411.jpg",
+		"description": "명품 자바는 다양한 독자들이 자바를 배우기 쉽도록 여러 가지 특징을 가지고 있습니다.",
+		"price": "19.99"
+	},
+	{
+		"title": "자료구조 (개정3판)",
+		"imageUrl": "https://www.booksr.co.kr/wp-content/uploads/2019/02/C%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0_%EC%95%9E%ED%91%9C%EC%A7%80-scaled-300x411.jpg",
+		"description": "자료구조는 컴퓨터 과학 및 공학 분야의 중요하고 기초적인 과목 중의 하나이다. ",
+		"price": "29000"
+	}
+]

@@ -19,9 +19,11 @@ const getProductsFromFile = (callback) => {
 };
 
 module.exports = class Product {
-    constructor(title) {
-        // 생성자 함수
-        this.title = title; // 상품명
+    constructor(title, imageUrl, description, price) {        // 생성자 함수 
+        this.title = title;             // 상품명
+        this.imageUrl = imageUrl;       // 이미지 URL
+        this.description = description; // 상품 설명
+        this.price = price;             // 상품 가격
     }
 
     save() {        // 상품 정보를 저장하는 메소드
