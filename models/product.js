@@ -11,9 +11,9 @@ const getProductsFromFile = (callback) => {
     
     fs.readFile(p, (err, fileContent) => {      // 파일을 읽음
         if (err) {                              // 파일을 읽는데 에러가 있다면
-            callback([]);                          // 빈 배열을 리턴
+            callback([]);                       // 빈 배열을 리턴
         } else {
-            callback(JSON.parse(fileContent));         // 파일 내용을 가져와서 JSON으로 변환
+            callback(JSON.parse(fileContent));  // 파일 내용을 가져와서 JSON으로 변환
         }
     });        
 };
@@ -27,6 +27,7 @@ module.exports = class Product {
     }
 
     save() {        // 상품 정보를 저장하는 메소드
+        this.id = Math.random().toString();      // 랜덤한 ID를 생성
         getProductsFromFile(products => {
             products.push(this);
             fs.writeFile(p, JSON.stringify(products), err => {
@@ -35,7 +36,16 @@ module.exports = class Product {
         });        
     }
 
+    // 모든 상품 정보를 가져오는 메소드
     static fetchAll(callback) {
         getProductsFromFile(callback);
+    }
+
+    // 상품 상세 정보를 가져오는 메소드
+    static findById(id, callback) {
+        getProductsFromFile(products => {
+            const product = products.find(p => p.id === id);    // ID로 상품을 찾음
+            callback(product);                                  // 상품 정보를 콜백함수로 전달
+        });
     }
 };
