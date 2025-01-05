@@ -33,19 +33,41 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-	res.render('shop/cart', {
-		path: '/cart',
-		pageTitle: 'Your Cart',
+	Cart.getCart((cart) => {
+		Product.fetchAll((products) => {
+			const cartProducts = [];
+			for (product of products) {
+				const cartProductData = cart.products.find((prod) => prod.id === product.id);
+				if (cartProductData) {
+					cartProducts.push({ productData: product, qty: cartProductData.qty });
+				}
+			}
+			res.render('shop/cart', {
+				path: '/cart',
+				pageTitle: 'Your Cart',
+				products: cartProducts,
+			});
+		});
 	});
+			
 };
 
 exports.postCart = (req, res, next) => {
-	const prodId = req.body.productId; // 상품 ID를 가져옴
+	const prodId = req.body.productId; 				// 상품 ID를 가져옴
 	Product.findById(prodId, (product) => {
-		Cart.addProduct(prodId, product.price); // 카트에 상품 추가
+		Cart.addProduct(prodId, product.price); 	// 카트에 상품 추가
 	});
 	res.redirect('/cart');
 };
+
+// 카트에서 상품 삭제
+exports.postCartDeleteProduct = (req, res, next) => {
+	const prodId = req.body.productId; 				// 상품 ID를 가져옴
+	Product.findById(prodId, (product) => {
+		Cart.deleteProduct(prodId, product.price); 	// 카트에서 상품 삭제
+		res.redirect('/cart');						// 카트 페이지로 리다이렉트
+	});	
+}
 
 exports.getOrders = (req, res, next) => {
 	res.render('shop/orders', {

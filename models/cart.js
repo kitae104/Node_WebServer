@@ -36,4 +36,36 @@ module.exports = class Cart {
             });
         });
     };
+
+    // 제품 정보를 삭제하는 메소드
+    static deleteProduct(id, productPrice) {
+        fs.readFile(p, (err, fileContent) => {
+            if(err) {
+                return;
+            }
+            const updatedCart = { ...JSON.parse(fileContent) };
+            const product = updatedCart.products.find(prod => prod.id === id);
+            if(!product) {  // 상품이 없다면
+                return;     // 종료
+            }
+            const productQty = product.qty;
+            updatedCart.products = updatedCart.products.filter(prod => prod.id !== id);            
+            updatedCart.totalPrice = updatedCart.totalPrice - productPrice * productQty;
+            fs.writeFile(p, JSON.stringify(updatedCart), err => {
+                console.log(err);
+            });
+        });
+    };
+
+    // 카트 정보를 가져오는 메소드
+    static getCart(callback){
+        fs.readFile(p, (err, fileContent) => {
+            const cart = JSON.parse(fileContent);   // 카트 정보를 가져옴
+            if(err) {
+                callback(null); // 에러가 있다면
+            } else {
+                callback(cart); // 카트 정보를 콜백함수로 전달
+            }
+        });
+    }
 }

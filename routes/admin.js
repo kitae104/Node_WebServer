@@ -11,4 +11,10 @@ router.get('/products', adminController.getProducts); // 상품 목록 페이지
 
 router.post('/add-product', adminController.postAddProduct);
 
+router.get('/edit-product/:productId', adminController.getEditProduct);
+
+router.post('/edit-product', adminController.postEditProduct);
+
+router.post('/delete-product', adminController.postDeleteProduct);
+
 module.exports = router; // Router 객체를 모듈로 내보냄
