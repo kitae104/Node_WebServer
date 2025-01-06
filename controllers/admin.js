@@ -16,7 +16,11 @@ exports.postAddProduct = (req, res, next) => {
 	const description = req.body.description; // 상품 설명
 
 	const product = new Product(null, title, imageUrl, description, price); // Product 모델 클래스의 객체 생성
-	product.save(); // 상품 정보를 저장
+	product.save()
+        .then(() => {
+            res.redirect('/');
+        })
+        .catch(err => console.log(err)); // 상품 정보를 저장
 	res.redirect('/');
 };
 

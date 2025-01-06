@@ -5,7 +5,6 @@ const cors = require('cors');
 const path = require('path');
 
 const errorController = require('./controllers/error');	// 에러 컨트롤러
-const db = require('./util/database');					// 데이터베이스 연결
 
 figlet('Node  Server', function (err, data) {
 	if (err) {
@@ -17,24 +16,13 @@ figlet('Node  Server', function (err, data) {
 });
 
 const app = express();
-const port = 3000;
+const port = 3333;
 
 app.set('view engine', 'ejs');                             // ejs 템플릿 엔진 설정
 app.set('views', 'views');                                 // views 폴더 설정
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
-
-//==========================================================================================
-// DB 연결 테스트
-//==========================================================================================
-db.execute('SELECT * FROM products')
-	.then(result => {
-		console.log(result[0]);
-	})
-	.catch(err => {
-		console.log(err);
-	});
 
 //==========================================================================================
 // 미들웨어 등록(use)
