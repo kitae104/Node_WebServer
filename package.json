@@ -14,6 +14,7 @@
         "express": "^4.21.1",
         "figlet": "^1.8.0",
         "mysql2": "^3.12.0",
-        "node_web": "file:"
+        "node_web": "file:",
+        "sequelize": "^6.37.5"
     }
 }

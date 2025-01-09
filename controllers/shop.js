@@ -2,12 +2,14 @@ const Product = require('../models/product'); // Product 모델 클래스를 가
 const Cart = require('../models/cart'); // Cart 모델 클래스를 가져옴
 
 exports.getProducts = (req, res, next) => {
-	Product.fetchAll()
-		.then(([rows, fieldData]) => {
+	Product.findAll() // 모든 상품을 가져옴
+		.then((products) => {
+			// 상품 목록을 가져옴
 			res.render('shop/product-list', {
-				prods: rows,
-				pageTitle: 'All Products',
-				path: '/products',
+				// product-list.ejs 렌더링
+				prods: products, // 상품 목록
+				pageTitle: 'All Products', // 페이지 제목
+				path: '/products', // 현재 경로
 			});
 		})
 		.catch((err) => console.log(err));
@@ -15,10 +17,11 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
 	const prodId = req.params.productId; // URL로부터 productId를 가져옴
-	Product.findById(prodId)
-		.then(([product]) => {
+	Product.findByPk(prodId) // 상품 ID로 상품을 찾음
+		.then((product) => {
+			// 상품 목록을 가져옴
 			res.render('shop/product-detail', {
-				product: product[0],
+				product: product,
 				pageTitle: product.title,
 				path: '/products',
 			});
@@ -27,39 +30,36 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-	Product.fetchAll()
-		.then(([rows, fieldData]) => {
+	Product.findAll() // 모든 상품을 가져옴
+		.then((products) => {
+			// 상품 목록을 가져옴
 			res.render('shop/index', {
-				prods: rows,
-				pageTitle: 'Shop',
-				path: '/',
+				// index.ejs 렌더링
+				prods: products, // 상품 목록
+				pageTitle: 'Shop', // 페이지 제목
+				path: '/', // 현재 경로
 			});
 		})
 		.catch((err) => console.log(err));
 };
 
 exports.getCart = (req, res, next) => {
-	Cart.getCart((cart) => {
-		Product.fetchAll((products) => {
-			const cartProducts = [];
-			for (product of products) {
-				const cartProductData = cart.products.find(
-					(prod) => prod.id === product.id
-				);
-				if (cartProductData) {
-					cartProducts.push({
-						productData: product,
-						qty: cartProductData.qty,
+	console.log(req.user.cart);
+	req.user
+		.getCart()
+		.then((cart) => {
+			return cart
+				.getProducts()
+				.then((products) => {
+					res.render('shop/cart', {
+						path: '/cart',
+						pageTitle: 'Your Cart',
+						products: products,
 					});
-				}
-			}
-			res.render('shop/cart', {
-				path: '/cart',
-				pageTitle: 'Your Cart',
-				products: cartProducts,
-			});
-		});
-	});
+				})
+				.catch((err) => console.log(err));
+		})
+		.catch((err) => console.log(err));
 };
 
 exports.postCart = (req, res, next) => {

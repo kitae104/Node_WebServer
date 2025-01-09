@@ -1,32 +1,27 @@
-const db = require("../util/database");     // 데이터베이스 모듈
-const Cart = require("./cart");             // 장바구니 모듈
+const Sequelize = require('sequelize');         // 시퀄라이즈 패키지  
+const sequelize = require('../util/database');  // 데이터베이스 모듈
 
-module.exports = class Product {
-    constructor(id, title, imageUrl, description, price) {        // 생성자 함수 
-        this.id = id;                   // 상품 ID
-        this.title = title;             // 상품명
-        this.imageUrl = imageUrl;       // 이미지 URL
-        this.description = description; // 상품 설명
-        this.price = price;             // 상품 가격
+// 상품 모델 정의
+const Product = sequelize.define('product', {   
+    id: {                           // 상품 ID
+        type: Sequelize.INTEGER,    // 데이터 타입은 정수형
+        autoIncrement: true,        // 자동 증가
+        allowNull: false,           // 널 값 허용 안함
+        primaryKey: true            // 기본 키
+    },
+    title: Sequelize.STRING,        // 상품명
+    price: {                        // 상품 가격
+        type: Sequelize.INTEGER,    // 데이터 타입은 정수형
+        allowNull: false            // 널 값 허용 안함
+    },
+    imageUrl: {                     // 이미지 URL
+        type: Sequelize.STRING,     // 데이터 타입은 문자열
+        allowNull: false            // 널 값 허용 안함
+    },
+    description: {                  // 상품 설명
+        type: Sequelize.STRING,     // 데이터 타입은 문자열
+        allowNull: false            // 널 값 허용 안함
     }
+});
 
-    save() {        // 상품 정보를 저장하는 메소드        
-        return db.execute('INSERT INTO products (title, price, imageUrl, description) VALUES (?, ?, ?, ?)', 
-            [this.title, this.price, this.imageUrl, this.description]);    // 상품 정보를 데이터베이스에 저장
-    }
-
-    // 모든 상품 정보를 가져오는 메소드
-    static fetchAll() {
-        return db.execute('SELECT * FROM products');    // 데이터베이스에 저장된 모든 상품 정보를 가져옴
-    }
-
-    // 상품 상세 정보를 가져오는 메소드
-    static findById(id) {
-        return db.execute('SELECT * FROM products where products.id = ?', [id]);    // 상품 ID에 해당하는 상품 정보를 가져옴
-    }
-
-    // 상품을 삭제하는 메소드
-    static deleteById(id) {
-        return db.execute('DELETE FROM products WHERE id = ?', [id]);    // 상품 ID에 해당하는 상품 정보를 삭제
-    }
-};
+module.exports = Product;    // 상품 모델을 내보냄
