@@ -1,9 +1,15 @@
-const Sequelize = require('sequelize');
+const mongodb = require('mongodb');         // mongodb 모듈
+const MongoClient = mongodb.MongoClient;    // mongodb 클라이언트
 
-// 데이터베이스 연결
-const sequelize = new Sequelize('nodejs_basic', 'root', '1234', {
-    dialect: 'mysql',
-    host: 'localhost'
-});
+const mongoConnect = callback => {
+    MongoClient.connect('mongodb+srv://aqua0405:password@cluster0.nvyhx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+        .then(client => {
+            console.log('Connected!');
+            callback(client);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+};
 
-module.exports = sequelize;
+module.exports = mongoConnect;

@@ -1,5 +1,5 @@
-const Product = require('../models/product'); // Product 모델 클래스를 가져옴
-const Cart = require('../models/cart'); // Cart 모델 클래스를 가져옴
+const Product = require('../models/product'); 	// Product 모델 클래스를 가져옴
+const Order = require('../models/order'); 		// Order 모델 클래스를 가져옴
 
 exports.getProducts = (req, res, next) => {
 	Product.findAll() // 모든 상품을 가져옴
@@ -117,11 +117,49 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-	res.render('shop/orders', {
-		path: '/orders',
-		pageTitle: 'Your Orders',
-	});
+	req.user
+		.getOrders({include: ['products']})						// 주문을 가져옴
+		.then(orders => {
+			console.log(orders);
+			res.render('shop/orders', {
+				path: '/orders',
+				pageTitle: 'Your Orders',
+				orders: orders,
+			});
+		})
+		.catch(err => console.log(err));	
 };
+
+exports.postOrder = (req, res, next) => {
+	let fetchedCart;							// 카트 정보를 저장할 변수
+	req.user
+		.getCart()
+		.then(cart => {
+			fetchedCart = cart;					// 카트를 저장
+			return cart.getProducts();			// 카트에서 상품을 가져옴
+		})
+		.then(products => {
+			return req.user
+				.createOrder()					// 주문을 생성
+				.then(order => {
+					return order.addProducts(
+						products.map(product => {
+							product.orderItem = { quantity: product.cartItem.quantity };	// 상품 수량을 설정
+							return product;													// 상품을 반환
+						})
+					);
+				})				
+				.catch(err => console.log(err));
+		})
+		.then(result => {
+			return fetchedCart.setProducts(null);		// 카트를 비움			
+		})
+		.then(result => {
+			res.redirect('/orders');					// 주문 페이지로 리다이렉트
+		})
+		.catch(err => console.log(err));
+};
+
 
 exports.getCheckout = (req, res, next) => {
 	res.render('shop/checkout', {
