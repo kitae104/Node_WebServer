@@ -1,23 +1,23 @@
 const Product = require('../models/product'); 	// Product 모델 클래스를 가져옴
-const Order = require('../models/order'); 		// Order 모델 클래스를 가져옴
+//const Order = require('../models/order'); 		// Order 모델 클래스를 가져옴
 
 exports.getProducts = (req, res, next) => {
-	Product.findAll() // 모든 상품을 가져옴
+	Product.fetchAll() // 모든 상품을 가져옴
 		.then((products) => {
 			// 상품 목록을 가져옴
-			res.render('shop/product-list', {
-				// product-list.ejs 렌더링
-				prods: products, // 상품 목록
-				pageTitle: 'All Products', // 페이지 제목
-				path: '/products', // 현재 경로
+			res.render('shop/product-list', {	// product-list.ejs 렌더링
+				prods: products, 				// 상품 목록
+				pageTitle: 'All Products', 		// 페이지 제목
+				path: '/products', 				// 현재 경로
 			});
 		})
 		.catch((err) => console.log(err));
 };
 
+// 상품 상세 페이지
 exports.getProduct = (req, res, next) => {
 	const prodId = req.params.productId; // URL로부터 productId를 가져옴
-	Product.findByPk(prodId) // 상품 ID로 상품을 찾음
+	Product.findById(prodId) // 상품 ID로 상품을 찾음
 		.then((product) => {
 			// 상품 목록을 가져옴
 			res.render('shop/product-detail', {
@@ -30,7 +30,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-	Product.findAll() // 모든 상품을 가져옴
+	Product.fetchAll() // 모든 상품을 가져옴
 		.then((products) => {
 			// 상품 목록을 가져옴
 			res.render('shop/index', {

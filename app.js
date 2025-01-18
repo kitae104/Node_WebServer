@@ -4,8 +4,9 @@ const bodyParser = require("body-parser");
 const cors = require('cors');
 const path = require('path');
 
-const errorController = require('./controllers/error');	// 에러 컨트롤러
-const mongoConnect = require('./util/database');		// 몽고디비 모듈
+const errorController = require('./controllers/error');			// 에러 컨트롤러
+const mongoConnect = require('./util/database').mongoConnect;	// 몽고디비 모듈
+const User = require('./models/user');							// 사용자 모델
 
 figlet('Node  Server', function (err, data) {
 	if (err) {
@@ -22,8 +23,8 @@ const port = 3333;
 app.set('view engine', 'ejs');                             // ejs 템플릿 엔진 설정
 app.set('views', 'views');                                 // views 폴더 설정
 
-// const adminRoutes = require('./routes/admin');
-// const shopRoutes = require('./routes/shop');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 
 //==========================================================================================
 // 미들웨어 등록(use)
@@ -37,7 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));    // 정적 파일 미
 
 // 사용자 정보를 미들웨어로 등록
 app.use((req, res, next) => {
-	User.findByPk(1)
+	User.findById('678b58e2f69b6ea840cbfe22')
 		.then(user => {
 			req.user = user;
 			next();
@@ -45,13 +46,12 @@ app.use((req, res, next) => {
 		.catch(err => console.log(err));
 }); 
 
-// app.use('/admin', adminRoutes);                        		// admin 라우터 등록
-// app.use(shopRoutes);										// shop 라우터 등록
+app.use('/admin', adminRoutes);                        		// admin 라우터 등록
+app.use(shopRoutes);										// shop 라우터 등록
 
 app.use(errorController.get404);							// 404 에러 페이지
 
-mongoConnect(client => {									// 몽고디비 연결
-	console.log(client);
+mongoConnect(() => {									// 몽고디비 연결
 	app.listen(port, () => {
 		console.log(`http://localhost:${port}`);
 	});

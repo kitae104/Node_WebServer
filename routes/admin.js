@@ -5,16 +5,16 @@ const adminController = require('../controllers/admin'); // adminController 모�
 
 const router = express.Router(); // Router 객체 생성
 
-router.get('/add-product', adminController.getAddProduct); 
+router.get('/add-product', adminController.getAddProduct); // 상품 추가 페이지 라우팅
 
 router.get('/products', adminController.getProducts); // 상품 목록 페이지 라우팅
 
-router.post('/add-product', adminController.postAddProduct);
+router.post('/add-product', adminController.postAddProduct);    // 상품 추가
 
-router.get('/edit-product/:productId', adminController.getEditProduct);
+router.get('/edit-product/:productId', adminController.getEditProduct); // 상품 수정 페이지 라우팅
 
-router.post('/edit-product', adminController.postEditProduct);
+router.post('/edit-product', adminController.postEditProduct);  // 상품 수정
 
-router.post('/delete-product', adminController.postDeleteProduct);
+router.post('/delete-product', adminController.postDeleteProduct);  // 상품 삭제
 
 module.exports = router; // Router 객체를 모듈로 내보냄
