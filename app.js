@@ -38,9 +38,9 @@ app.use(express.static(path.join(__dirname, 'public')));    // 정적 파일 미
 
 // 사용자 정보를 미들웨어로 등록
 app.use((req, res, next) => {
-	User.findById('678b58e2f69b6ea840cbfe22')
+	User.findById('678baa219b5d99b7d229bc7e')
 		.then(user => {
-			req.user = user;
+			req.user = new User(user.name, user.email, user.cart, user._id); // 사용자 정보를 req.user에 저장
 			next();
 		})
 		.catch(err => console.log(err));

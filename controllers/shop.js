@@ -7,7 +7,7 @@ exports.getProducts = (req, res, next) => {
 			// 상품 목록을 가져옴
 			res.render('shop/product-list', {	// product-list.ejs 렌더링
 				prods: products, 				// 상품 목록
-				pageTitle: 'All Products', 		// 페이지 제목
+				pageTitle: '모든 상품 리스트', 		// 페이지 제목
 				path: '/products', 				// 현재 경로
 			});
 		})
@@ -36,7 +36,7 @@ exports.getIndex = (req, res, next) => {
 			res.render('shop/index', {
 				// index.ejs 렌더링
 				prods: products, // 상품 목록
-				pageTitle: 'Shop', // 페이지 제목
+				pageTitle: '쇼핑몰', // 페이지 제목
 				path: '/', // 현재 경로
 			});
 		})
@@ -44,55 +44,27 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-	console.log(req.user.cart);
 	req.user
 		.getCart()
-		.then((cart) => {
-			return cart
-				.getProducts()
-				.then((products) => {
-					res.render('shop/cart', {
-						path: '/cart',
-						pageTitle: 'Your Cart',
-						products: products,
-					});
-				})
-				.catch((err) => console.log(err));
-		})
+		.then((products) => {
+			res.render('shop/cart', {
+				path: '/cart',
+				pageTitle: '카트 보기',
+				products: products,
+			});
+		})		
 		.catch((err) => console.log(err));
 };
 
 // 카트에 상품 추가
 exports.postCart = (req, res, next) => {
 	const prodId = req.body.productId; 		// 상품 ID를 가져옴
-	let fetchedCart;						// 카트를 가져옴
-	let newQuantity = 1;					// 상품 수량을 1로 설정
-
-	req.user
-		.getCart()
-		.then(cart => {						// 카트를 가져옴
-			fetchedCart = cart;				// 카트를 저장		
-			return cart.getProducts({ where: { id: prodId } });
+	Product.findById(prodId) 				// 상품 ID로 상품을 찾음
+		.then((product) => {
+			return req.user.addToCart(product);	// 카트에 상품 추가
 		})
-		.then(products => {						// 상품을 가져옴
-			let product;						// 상품을 저장할 변수
-			if (products.length > 0) {			// 상품이 이미 카트에 있는 경우
-				product = products[0];			// 첫 번째 상품을 가져옴					
-			}
-			
-			if(product) {						// 상품이 이미 있는 경우
-				const oldQuantity = product.cartItem.quantity;	// 기존 수량을 가져옴
-				newQuantity = oldQuantity + 1;	// 수량을 1 증가
-				return product;					// 상품을 반환
-			}
-			return Product.findByPk(prodId);	// 상품을 찾아 반환
-		})
-		.then(product => {
-			return fetchedCart.addProduct(product, {	// 카트에 상품을 추가
-				through: { quantity: newQuantity }		// 수량을 설정
-			});
-		})		
-		.then(() => {
+		.then((result) => {
+			console.log(result);
 			res.redirect('/cart');				// 카트 페이지로 리다이렉트
 		})
 		.catch((err) => console.log(err));
@@ -100,30 +72,23 @@ exports.postCart = (req, res, next) => {
 
 // 카트에서 상품 삭제
 exports.postCartDeleteProduct = (req, res, next) => {
-	const prodId = req.body.productId; // 상품 ID를 가져옴
+	const prodId = req.body.productId; 		// 상품 ID를 가져옴
 	req.user
-		.getCart()
-		.then(cart => {
-			return cart.getProducts({ where: { id: prodId } });	// 카트에서 상품을 찾아 반환
-		})
-		.then(products => {							// 상품을 가져옴
-			const product = products[0];			// 첫 번째 상품을 가져옴
-			return product.cartItem.destroy(); 		// 상품을 삭제
-		})
-		.then(() => {
-			res.redirect('/cart');					// 카트 페이지로 리다이렉트
+		.deleteItemFromCart(prodId)			// 카트에서 상품 삭제
+		.then(result => {			
+			res.redirect('/cart');			// 카트 페이지로 리다이렉트
 		})
 		.catch((err) => console.log(err))	
 };
 
 exports.getOrders = (req, res, next) => {
 	req.user
-		.getOrders({include: ['products']})						// 주문을 가져옴
+		.getOrders({include: ['products']})	// 주문을 가져옴
 		.then(orders => {
 			console.log(orders);
 			res.render('shop/orders', {
 				path: '/orders',
-				pageTitle: 'Your Orders',
+				pageTitle: '주문 리스트',
 				orders: orders,
 			});
 		})
@@ -133,37 +98,16 @@ exports.getOrders = (req, res, next) => {
 exports.postOrder = (req, res, next) => {
 	let fetchedCart;							// 카트 정보를 저장할 변수
 	req.user
-		.getCart()
-		.then(cart => {
-			fetchedCart = cart;					// 카트를 저장
-			return cart.getProducts();			// 카트에서 상품을 가져옴
-		})
-		.then(products => {
-			return req.user
-				.createOrder()					// 주문을 생성
-				.then(order => {
-					return order.addProducts(
-						products.map(product => {
-							product.orderItem = { quantity: product.cartItem.quantity };	// 상품 수량을 설정
-							return product;													// 상품을 반환
-						})
-					);
-				})				
-				.catch(err => console.log(err));
-		})
+		.addOrder()								// 주문 추가
 		.then(result => {
-			return fetchedCart.setProducts(null);		// 카트를 비움			
-		})
-		.then(result => {
-			res.redirect('/orders');					// 주문 페이지로 리다이렉트
+			res.redirect('/orders');			// 주문 페이지로 리다이렉트
 		})
 		.catch(err => console.log(err));
 };
 
-
 exports.getCheckout = (req, res, next) => {
 	res.render('shop/checkout', {
 		path: '/checkout',
-		pageTitle: 'Checkout',
+		pageTitle: '체크 아웃',
 	});
 };

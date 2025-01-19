@@ -20,7 +20,7 @@ exports.postAddProduct = (req, res, next) => {
         .save()
         .then(result => {
             console.log('상품 생성');
-            res.redirect('/admin/product'); // 상품 목록 페이지로 리다이렉트
+            res.redirect('/admin/products'); // 상품 목록 페이지로 리다이렉트
         }) 
         .catch(err => console.log(err));    
 };
@@ -88,7 +88,7 @@ exports.getProducts = (req, res, next) => {
         .catch(err => console.log(err));	
 };
 
-// // 상품 삭제
+// 상품 삭제
 exports.postDeleteProduct = (req, res, next) => {    
     const prodId = req.body.productId; // 상품 ID
     Product
