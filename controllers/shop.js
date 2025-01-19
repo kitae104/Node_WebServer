@@ -1,5 +1,4 @@
 const Product = require('../models/product'); 	// Product 모델 클래스를 가져옴
-//const Order = require('../models/order'); 		// Order 모델 클래스를 가져옴
 
 exports.getProducts = (req, res, next) => {
 	Product.fetchAll() // 모든 상품을 가져옴
@@ -83,13 +82,13 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
 	req.user
-		.getOrders({include: ['products']})	// 주문을 가져옴
-		.then(orders => {
-			console.log(orders);
+		.getOrders()						// 주문을 가져옴
+		.then(orders => {		
+			console.log("orders : " + orders);	
 			res.render('shop/orders', {
 				path: '/orders',
 				pageTitle: '주문 리스트',
-				orders: orders,
+				orders: orders
 			});
 		})
 		.catch(err => console.log(err));	

@@ -1,18 +1,18 @@
-const mongodb = require('mongodb'); // mongodb 모듈 가져오기
-const getDb = require('../util/database').getDb; // getDb 함수 가져오기
-const ObjectId = mongodb.ObjectId; // ObjectId 가져오기
+const mongodb = require('mongodb'); 				// mongodb 모듈 가져오기
+const getDb = require('../util/database').getDb; 	// getDb 함수 가져오기
+const ObjectId = mongodb.ObjectId; 					// ObjectId 가져오기
 
 class User {
 	constructor(username, email, cart, id) {
 		this.name = username;
 		this.email = email;
-		this.cart = cart || { items: [] }; // 카트 정보 { items: [] }
-		this._id = id; // 사용자 ID
+		this.cart = cart 			// 카트 정보 { items: [] }
+		this._id = id; 				// 사용자 ID
 	}
 
 	// 사용자 정보 저장
 	save() {
-		const db = getDB();
+		const db = getDb();
 		return db.collection('users').insertOne(this);
 	}
 
@@ -83,32 +83,49 @@ class User {
     }
 
 	addOrder() {
-		const db = getDb();										// db 가져오기
-		return db
-			.collection('orders')								// orders 컬렉션 가져오기
-			.insertOne(this.cart)								// 주문 추가
-			.then(result => {										
-				this.cart = { items: []};						// 카트 비우기
-				return db										// db 반환
-					.collection('users')						// users 컬렉션 가져오기	
-					.updateOne(									// 사용자 업데이트
-						{ _id: new ObjectId(this._id) },		// 사용자 ID로 사용자 찾기	
-						{ $set: { cart: { items: [] } } }		// 카트 비우기
-					);
+		const db = getDb();							// db 가져오기
+		return this.getCart()						// 카트 정보 가져오기
+			.then(products => {						// 상품 정보 반환
+			const order = {							// 주문 정보
+				items : products,					// 주문 상품 정보
+				user : { 							// 사용자 정보
+					_id: new ObjectId(this._id), 	// 사용자 ID
+					name: this.name,				// 사용자 이름
+				} 
+			};
+			return db								// db 반환
+				.collection('orders')				// orders 컬렉션 가져오기
+				.insertOne(order)					// 주문 추가
+		})								
+		.then(result => {										
+			this.cart = { items: []};						// 카트 비우기
+			return db										// db 반환
+				.collection('users')						// users 컬렉션 가져오기	
+				.updateOne(									// 사용자 업데이트
+					{ _id: new ObjectId(this._id) },		// 사용자 ID로 사용자 찾기	
+					{ $set: { cart: { items: [] } } }		// 카트 비우기
+				);
 		});
+	}
+
+	getOrders() {
+		const db = getDb();
+		return db
+			.collection('orders')
+			.find({ 'user._id': new ObjectId(this._id) })
+			.toArray();
 	}
 
 	static findById(userId) {
 		const db = getDb(); // db 가져오기
 		return db
-			.collection('users') // users 컬렉션 가져오기
+			.collection('users') 					// users 컬렉션 가져오기
 			.findOne({ _id: new ObjectId(userId) }) // 사용자 ID로 사용자 찾기(조건 검색)
-			.then((user) => {
-				// 사용자 반환
+			.then((user) => {						// 사용자 반환
 				console.log(user);
-				return user; // 사용자 반환
+				return user; 						// 사용자 반환
 			})
-			.catch((err) => console.log(err)); // 에러 처리
+			.catch((err) => console.log(err)); 		// 에러 처리
 	}
 }
 
