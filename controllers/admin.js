@@ -21,6 +21,7 @@ exports.postAddProduct = (req, res, next) => {
 		price: price,
 		description: description,
 		imageUrl: imageUrl,
+		userId: req.user, 						// 사용자 ID
     }); 
 	product
 		.save()
@@ -81,7 +82,9 @@ exports.postEditProduct = (req, res, next) => {
 // 상품 목록 페이지 라우팅
 exports.getProducts = (req, res, next) => {
 	Product.find()                              // 모든 상품을 가져옴
-		.then(products => {			            // 상품 목록을 가져옴
+		// .populate('userId')                     // userId 필드를 참조하여 User 모델의 정보를 가져옴
+		.then(products => {						// 상품 목록을 가져옴			
+			//console.log(products);
 			res.render('admin/products', {		// products.ejs 렌더링
 				prods: products,                // 상품 목록
 				pageTitle: '관리자 상품',       // 페이지 제목

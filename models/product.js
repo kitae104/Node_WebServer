@@ -18,6 +18,11 @@ const productSchema = new Schema({          // 스키마 생성
     imageUrl: {                             // 이미지 URL
         type: String,
         required: true
+    },      
+    userId: {                               // 사용자 ID
+        type: Schema.Types.ObjectId,        // ObjectID 타입
+        ref: 'User',                        // User 모델 참조 
+        required: true
     }
 });
 

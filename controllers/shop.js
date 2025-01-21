@@ -1,4 +1,5 @@
 const Product = require('../models/product'); 	// Product 모델 클래스를 가져옴
+const Order = require('../models/order'); 		// Order 모델 클래스를 가져옴
 
 // 상품 목록 페이지
 exports.getProducts = (req, res, next) => {
@@ -43,15 +44,16 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
 	req.user
-		.getCart()
-		.then((products) => {
+		.populate('cart.items.productId')    	
+		.then(user => {
+		const products = user.cart.items;
 			res.render('shop/cart', {
 				path: '/cart',
 				pageTitle: '카트 보기',
 				products: products,
 			});
 		})		
-		.catch((err) => console.log(err));
+		.catch((err) => console.log(err));	
 };
 
 // 카트에 상품 추가
@@ -62,7 +64,7 @@ exports.postCart = (req, res, next) => {
 			return req.user.addToCart(product);	// 카트에 상품 추가
 		})
 		.then((result) => {
-			console.log(result);
+			//console.log(result);
 			res.redirect('/cart');				// 카트 페이지로 리다이렉트
 		})
 		.catch((err) => console.log(err));
@@ -72,18 +74,17 @@ exports.postCart = (req, res, next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
 	const prodId = req.body.productId; 		// 상품 ID를 가져옴
 	req.user
-		.deleteItemFromCart(prodId)			// 카트에서 상품 삭제
+		.removeFromCart(prodId)				// 카트에서 상품 삭제
 		.then(result => {			
 			res.redirect('/cart');			// 카트 페이지로 리다이렉트
 		})
 		.catch((err) => console.log(err))	
 };
 
+// 주문 페이지
 exports.getOrders = (req, res, next) => {
-	req.user
-		.getOrders()						// 주문을 가져옴
-		.then(orders => {		
-			console.log("orders : " + orders);	
+	Order.find({ 'user.userId': req.user._id })	// 주문을 찾음
+		.then(orders => {
 			res.render('shop/orders', {
 				path: '/orders',
 				pageTitle: '주문 리스트',
@@ -93,11 +94,28 @@ exports.getOrders = (req, res, next) => {
 		.catch(err => console.log(err));	
 };
 
+// 주문 추가
 exports.postOrder = (req, res, next) => {
-	let fetchedCart;							// 카트 정보를 저장할 변수
 	req.user
-		.addOrder()								// 주문 추가
+		.populate('cart.items.productId')    	
+		.then(user => {
+			console.log("user.cart.items : " + user.cart.items);
+			const products = user.cart.items.map(i => {
+				return { quantity: i.quantity, product: {...i.productId._doc } };
+			});
+			const order = new Order({
+				user: {
+					name: req.user.name,
+					userId: req.user,
+				},
+				products: products,		
+			});
+			return order.save();				// 주문 추가
+		})							
 		.then(result => {
+			return req.user.clearCart();		// 카트 비우기			
+		})
+		.then(() => {
 			res.redirect('/orders');			// 주문 페이지로 리다이렉트
 		})
 		.catch(err => console.log(err));
