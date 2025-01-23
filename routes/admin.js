@@ -1,5 +1,5 @@
+// 관리자 관련 라우팅 처리
 const express = require('express');
-const path = require('path');
 
 const adminController = require('../controllers/admin'); // adminController 모듈 가져오기
 

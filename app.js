@@ -20,11 +20,12 @@ figlet('Node  Server', function (err, data) {
 const app = express();
 const port = 3333;
 
-app.set('view engine', 'ejs');                             // ejs 템플릿 엔진 설정
-app.set('views', 'views');                                 // views 폴더 설정
+app.set('view engine', 'ejs');               	// ejs 템플릿 엔진 설정
+app.set('views', 'views');                      // views 폴더 설정
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
+const adminRoutes = require('./routes/admin');	// 관리자 라우터
+const shopRoutes = require('./routes/shop');	// 상품 라우터
+const authRoutes = require('./routes/auth');	// 인증 라우터
 
 //==========================================================================================
 // 미들웨어 등록(use)
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminRoutes);                        		// admin 라우터 등록
 app.use(shopRoutes);										// shop 라우터 등록
+app.use(authRoutes);										// auth 라우터 등록
 
 app.use(errorController.get404);							// 404 에러 페이지
 

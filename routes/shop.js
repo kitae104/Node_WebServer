@@ -1,5 +1,5 @@
+// 상품 관련 라우팅 처리
 const express = require('express');
-const path = require('path');
 
 const shopController = require('../controllers/shop'); // productsController 모듈 가져오기
 
