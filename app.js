@@ -24,7 +24,7 @@ figlet('Node  Server', function (err, data) {
 
 const app = express();
 const port = 3333;
-const MONGODB_URI = 'mongodb+srv://aqua0405:ajtwlsrlxo1%40@cluster0.nvyhx.mongodb.net/shop';
+const MONGODB_URI = 'mongodb+srv://id:password@cluster0.nvyhx.mongodb.net/shop';
 
 const store = new MongoDBStore({				// MongoDB 세션 저장소 생성
 	uri: MONGODB_URI,
@@ -71,7 +71,7 @@ app.use(authRoutes);										// auth 라우터 등록
 
 app.use(errorController.get404);							// 404 에러 페이지
 
-mongoose.connect('mongodb+srv://aqua0405:ajtwlsrlxo1%40@cluster0.nvyhx.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('mongodb+srv://id:password@cluster0.nvyhx.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0')
 	.then(result => {
 		User.findOne().then(user => {
 			if (!user) {						// 사용자가 없으면
