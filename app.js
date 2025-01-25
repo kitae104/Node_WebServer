@@ -1,5 +1,6 @@
 const figlet = require('figlet');
 const express = require('express');
+const dotenv = require("dotenv").config();
 const bodyParser = require("body-parser");
 const cors = require('cors');
 const path = require('path');
@@ -23,8 +24,10 @@ figlet('Node  Server', function (err, data) {
 });
 
 const app = express();
-const port = 3333;
-const MONGODB_URI = 'mongodb+srv://id:password@cluster0.nvyhx.mongodb.net/shop';
+const PORT = process.env.PORT;
+const MONGODB_URI = process.env.MONGODB_URI;
+const USER_ID = process.env.USER_ID;
+const SECRET = process.env.SECRET_KEY;
 
 const store = new MongoDBStore({				// MongoDB 세션 저장소 생성
 	uri: MONGODB_URI,
@@ -48,7 +51,7 @@ app.use(bodyParser.urlencoded({ extended: false }));        // body-parser 미�
 
 app.use(express.static(path.join(__dirname, 'public')));    // 정적 파일 미들웨어 등록
 app.use(session({											// 세션 미들웨어 등록
-	secret: 'my secret', 									// 세션 암호화 키
+	secret: SECRET, 										// 세션 암호화 키
 	resave: false, 											// 세션을 항상 저장할지 여부
 	saveUninitialized: false,								// 초기화되지 않은 세션을 저장소에 저장할지 여부
 	store: store											// 세션 저장소
@@ -57,7 +60,7 @@ app.use(session({											// 세션 미들웨어 등록
 
 //사용자 정보를 미들웨어로 등록
 app.use((req, res, next) => {
-	User.findById('678f4502e5e2f463ece21680')
+	User.findById(USER_ID)
 		.then(user => {
 			req.user = user; // 사용자 정보를 req.user에 저장
 			next();
@@ -71,7 +74,7 @@ app.use(authRoutes);										// auth 라우터 등록
 
 app.use(errorController.get404);							// 404 에러 페이지
 
-mongoose.connect('mongodb+srv://id:password@cluster0.nvyhx.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect(MONGODB_URI + '?retryWrites=true&w=majority&appName=Cluster0')
 	.then(result => {
 		User.findOne().then(user => {
 			if (!user) {						// 사용자가 없으면
@@ -85,8 +88,8 @@ mongoose.connect('mongodb+srv://id:password@cluster0.nvyhx.mongodb.net/shop?retr
 				user.save();
 			}
 		});		
-		app.listen(port, () => {
-			console.log(`http://localhost:${port}`);
+		app.listen(PORT, () => {
+			console.log(`http://localhost:${PORT}`);
 		});
 	})
 	.catch(err => {
