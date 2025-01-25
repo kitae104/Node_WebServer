@@ -1,19 +1,31 @@
+const dotenv = require('dotenv').config();
+const User = require('../models/user');
+
 exports.getLogin = (req, res, next) => {
-	// const isLoggedIn = req
-	// 	.get('Cookie')
-	// 	.split(';')[3]
-	// 	.trim()
-	// 	.split('=')[1] === 'true';	
-	console.log(req.session.isLoggedIn);		// 세션에 저장된 로그인 정보 출력
-	res.render('auth/login', {					// views/auth/login.ejs 렌더링
-		path: '/login',							// 로그인 페이지로 이동 
-		pageTitle: '로그인',					// 페이지 타이틀
-        isAuthenticated: false,			// 인증 여부
+	res.render('auth/login', {		// views/auth/login.ejs 렌더링
+		path: '/login', 			// 로그인 페이지로 이동
+		pageTitle: '로그인', 		// 페이지 타이틀
+		isAuthenticated: false, 	// 인증 여부
 	});
 };
 
-exports.postLogin = (req, res, next) => {		
-	// res.setHeader('Set-Cookie', 'loggedIn=true; HttpOnly');	// 쿠키 설정    	
-	req.session.isLoggedIn = true;					// 세션에 로그인 정보 저장
-	res.redirect('/');								// 홈페이지로 이동
+const USER_ID = process.env.USER_ID;
+exports.postLogin = (req, res, next) => {	
+	User.findById(USER_ID)						// 사용자 ID로 사용자를 찾음
+		.then((user) => {						// 사용자를 찾으면
+			req.session.isLoggedIn = true;      // 세션에 인증 정보를 저장
+			req.session.user = user;			// 사용자 정보를 세션에 저장
+			req.session.save((err) => {			// 세션 저장
+				console.log(err);
+				res.redirect('/');
+			});			
+		})
+		.catch((err) => console.log(err));
+};
+
+exports.postLogout = (req, res, next) => {
+	req.session.destroy((err) => {
+		console.log("logout:" + err);
+		res.redirect('/');
+	});
 };

@@ -50,19 +50,23 @@ app.use(bodyParser.json());                                 // body-parser 미�
 app.use(bodyParser.urlencoded({ extended: false }));        // body-parser 미들웨어 등록
 
 app.use(express.static(path.join(__dirname, 'public')));    // 정적 파일 미들웨어 등록
-app.use(session({											// 세션 미들웨어 등록
-	secret: SECRET, 										// 세션 암호화 키
-	resave: false, 											// 세션을 항상 저장할지 여부
-	saveUninitialized: false,								// 초기화되지 않은 세션을 저장소에 저장할지 여부
-	store: store											// 세션 저장소
-}));	
-
+app.use(
+	session({												// 세션 미들웨어 등록
+		secret: SECRET, 									// 세션 암호화 키
+		resave: false, 										// 세션을 항상 저장할지 여부
+		saveUninitialized: false,							// 초기화되지 않은 세션을 저장소에 저장할지 여부
+		store: store										// 세션 저장소
+	})
+);	
 
 //사용자 정보를 미들웨어로 등록
 app.use((req, res, next) => {
-	User.findById(USER_ID)
+	if (!req.session.user) {				// 세션에 사용자 정보가 없으면
+		return next();						// 다음 미들웨어로 이동
+	}
+	User.findById(req.session.user._id)		// 세션에 저장된 사용자 ID로 사용자를 찾음
 		.then(user => {
-			req.user = user; // 사용자 정보를 req.user에 저장
+			req.user = user; 				// 사용자 정보를 req.user에 저장
 			next();
 		})
 		.catch(err => console.log(err));

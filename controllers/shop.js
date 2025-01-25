@@ -10,7 +10,7 @@ exports.getProducts = (req, res, next) => {
 				prods: products, 				// 상품 목록
 				pageTitle: '모든 상품 리스트', 	// 페이지 제목
 				path: '/products', 				// 현재 경로
-				isAuthenticated: req.isLoggedIn,
+				isAuthenticated: req.session.isLoggedIn,
 			});
 		})
 		.catch((err) => console.log(err));
@@ -25,7 +25,7 @@ exports.getProduct = (req, res, next) => {
 				product: product,
 				pageTitle: product.title,
 				path: '/products',
-				isAuthenticated: req.isLoggedIn,
+				isAuthenticated: req.session.isLoggedIn,
 			});
 		})
 		.catch((err) => console.log(err));
@@ -39,7 +39,7 @@ exports.getIndex = (req, res, next) => {
 				prods: products, 			// 상품 목록
 				pageTitle: '쇼핑몰', 		// 페이지 제목
 				path: '/', 					// 현재 경로
-				isAuthenticated: req.isLoggedIn,
+				isAuthenticated: req.session.isLoggedIn,
 			});
 		})
 		.catch((err) => console.log(err));
@@ -54,7 +54,7 @@ exports.getCart = (req, res, next) => {
 				path: '/cart',
 				pageTitle: '카트 보기',
 				products: products,
-				isAuthenticated: req.isLoggedIn,
+				isAuthenticated: req.session.isLoggedIn,
 			});
 		})		
 		.catch((err) => console.log(err));	
@@ -77,7 +77,7 @@ exports.postCart = (req, res, next) => {
 // 카트에서 상품 삭제
 exports.postCartDeleteProduct = (req, res, next) => {
 	const prodId = req.body.productId; 		// 상품 ID를 가져옴
-	req.user
+	req.session.user
 		.removeFromCart(prodId)				// 카트에서 상품 삭제
 		.then(result => {			
 			res.redirect('/cart');			// 카트 페이지로 리다이렉트
@@ -93,7 +93,7 @@ exports.getOrders = (req, res, next) => {
 				path: '/orders',
 				pageTitle: '주문 리스트',
 				orders: orders,
-				isAuthenticated: req.isLoggedIn,
+				isAuthenticated: req.session.isLoggedIn,
 			});
 		})
 		.catch(err => console.log(err));	
@@ -130,6 +130,6 @@ exports.getCheckout = (req, res, next) => {
 	res.render('shop/checkout', {
 		path: '/checkout',
 		pageTitle: '체크 아웃',
-		isAuthenticated: req.isLoggedIn,
+		isAuthenticated: req.session.isLoggedIn,
 	});
 };

@@ -7,7 +7,7 @@ exports.getAddProduct = (req, res, next) => {
 		pageTitle: '상품 추가', // 페이지 제목
 		path: '/admin/add-product', // 현재 경로
 		editing: false, // 수정 여부
-		isAuthenticated: req.isLoggedIn, // 인증 여부	
+		isAuthenticated: req.session.isLoggedIn, // 인증 여부	
 	});
 };
 
@@ -52,7 +52,7 @@ exports.getEditProduct = (req, res, next) => {
 				path: '/admin/edit-product', // 현재 경로
 				editing: editMode,
 				product: product,
-				isAuthenticated: req.isLoggedIn, // 인증 여부	
+				isAuthenticated: req.session.isLoggedIn, // 인증 여부	
 			});
 		})
 		.catch((err) => console.log(err));
@@ -91,7 +91,7 @@ exports.getProducts = (req, res, next) => {
 				prods: products,                // 상품 목록
 				pageTitle: '관리자 상품',       // 페이지 제목
 				path: '/admin/products',        // 현재 경로
-				isAuthenticated: req.isLoggedIn, // 인증 여부	
+				isAuthenticated: req.session.isLoggedIn, // 인증 여부	
 			});
 		})
 		.catch((err) => console.log(err));

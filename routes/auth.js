@@ -8,4 +8,6 @@ router.get('/login', authController.getLogin);          // 로그인 페이지 �
 
 router.post('/login', authController.postLogin);        // 로그인 처리 라우팅
 
+router.post('/logout', authController.postLogout);      // 로그아웃 처리 라우팅
+
 module.exports = router;                                // router 객체를 모듈로 내보냄
