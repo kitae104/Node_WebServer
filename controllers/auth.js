@@ -4,10 +4,16 @@ const User = require('../models/user');
 
 // 로그인 페이지 렌더링
 exports.getLogin = (req, res, next) => {
+	let message = req.flash('error'); 		// 에러 메시지
+	if(message.length > 0) {				// 에러 메시지가 있으면
+		message = message[0];				// 첫 번째 에러 메시지를 가져옴
+	} else {
+		message = null;						// 에러 메시지가 없으면 null
+	}
 	res.render('auth/login', {		// views/auth/login.ejs 렌더링
 		path: '/login', 			// 로그인 페이지로 이동
 		pageTitle: '로그인', 		// 페이지 타이틀
-		isAuthenticated: false, 	// 인증 여부
+		errorMessage: message, 		// 에러 메시지
 	});
 };
 
@@ -20,6 +26,7 @@ exports.postLogin = (req, res, next) => {
 	User.findOne({email: email}) 			// 이메일로 사용자를 찾음
 		.then((user) => {
 			if (!user) {						// 사용자가 없으면
+				req.flash('error', '이메일이나 비밀번호가 일치하지 않습니다.'); // 에러 메시지
 				return res.redirect('/login'); 	// 로그인 페이지로 이동
 			}
 			bcrypt
@@ -53,10 +60,16 @@ exports.postLogout = (req, res, next) => {
 
 // 회원가입 페이지 렌더링
 exports.getSignup = (req, res, next) => {
+	let message = req.flash('error');		// 에러 메시지
+	if(message.length > 0) {				// 에러 메시지가 있으면
+		message = message[0];				// 첫 번째 에러 메시지를 가져옴
+	} else {
+		message = null;						// 에러 메시지가 없으면 null
+	}
 	res.render('auth/signup', {
 		path: '/signup',
 		pageTitle: '회원가입',
-		isAuthenticated: false,
+		errorMessage: message,
 	});
 };
 
@@ -69,6 +82,7 @@ exports.postSignup = (req, res, next) => {
 	User.findOne({ email: email }) 				// 이메일로 사용자를 찾음
 		.then((userDoc) => {					// 사용자를 찾으면
 			if (userDoc) {						// 사용자가 있으면
+				req.flash('error', '이미 사용중인 이메일입니다. 다른 이메일을 사용하세요.'); // 에러 메시지
 				return res.redirect('/signup'); // 회원가입 페이지로 이동
 			}
 			return bcrypt
