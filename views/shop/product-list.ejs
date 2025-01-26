@@ -22,14 +22,14 @@
                             <p class="product__description"><%= product.description %></p>
                         </div>
                         <div class="card__actions">
-                            <a href="/products/<%= product._id %>" class="btn">Details</a>
+                            <a href="/products/<%= product._id %>" class="btn">상세 보기</a>
                             <%- include('../includes/add-to-cart.ejs', {product: product}) %>
                         </div>
                     </article>
                 <% } %>
             </div>
         <% } else { %>
-            <h1>No Products Found!</h1>
+            <h1>상품을 찾을 수 없습니다!</h1>
         <% } %>
     </main>
 <%- include('../includes/end.ejs') %>

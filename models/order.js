@@ -11,7 +11,7 @@ const orderSchema = new Schema({
 		},
 	],
 	user: {		                            // 사용자 정보
-		name: {			                    // 이름
+		email: {			                    // 이름
 			type: String,
 			required: true,
 		},

@@ -13,7 +13,8 @@
                         <h2>Quantity: <%= p.quantity %></h2>
                         <form action="/cart-delete-item" method="POST">
                             <input type="hidden" value="<%= p.productId._id %>" name="productId">
-                            <button class="btn danger" type="submit">Delete</button>
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button class="btn danger" type="submit">삭제 하기</button>
                         </form>
                     </li>
                 <% }) %>
@@ -21,11 +22,12 @@
             <hr>
             <div class="centered">
                 <form action="/create-order" method="POST">
-                    <button type="submit" class="btn">Order Now!</button>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn">지금 주문!</button>
                 </form>
             </div>
         <% } else { %>
-            <h1>현재 카트에 상품이 없습니다.</h1>
+            <h1>현재 장바구니에는 상품이 없습니다.</h1>
         <% } %>
     </main>
 <%- include('../includes/head.ejs') %>

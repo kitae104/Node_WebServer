@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
-	name: {						// 이름
+const userSchema = new Schema({	
+	email: {					// 이메일
 		type: String,
 		required: true,
 	},
-	email: {					// 이메일
+	password: {					// 비밀번호
 		type: String,
 		required: true,
 	},

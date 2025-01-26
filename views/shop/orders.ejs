@@ -6,7 +6,7 @@
         <%- include('../includes/navigation.ejs') %>
         <main>
             <% if (orders.length <= 0) { %>
-                <h1>Nothing there!</h1>
+                <h1>현재 주문이 없습니다!</h1>
             <% } else { %>
                 <ul class="orders">
                     <% orders.forEach(order => { %>
