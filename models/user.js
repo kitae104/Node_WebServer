@@ -11,6 +11,8 @@ const userSchema = new Schema({
 		type: String,
 		required: true,
 	},
+	resetToken: String,			// 비밀번호 초기화 토큰
+	resetTokenExpiration: Date,	// 비밀번호 초기화 토큰 만료 시간	
 	cart: {						// 장바구니
 		items: [				// 상품 목록
 			{

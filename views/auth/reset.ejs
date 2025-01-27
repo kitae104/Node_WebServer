@@ -9,21 +9,14 @@
     <main>
         <% if (errorMessage) { %>
             <div class="user-message user-message--error"><%= errorMessage %></div>
-        <% } %>        
-        <form class="login-form" action="/login" method="POST">
+        <% } %>
+        <form class="login-form" action="/reset" method="POST">
             <div class="form-control">
                 <label for="email">이메일</label>
                 <input type="email" name="email" id="email">
             </div>
-            <div class="form-control">
-                <label for="password">비밀번호</label>
-                <input type="password" name="password" id="password">
-            </div>   
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">         
-            <button class="btn" type="submit">로그인</button>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn" type="submit">비밀번호 재설정</button>
         </form>
-        <div>
-            <a href="/reset">비밀번호 재설정</a>
-        </div>
     </main>
 <%- include('../includes/end.ejs') %>

@@ -66,33 +66,33 @@ exports.postEditProduct = (req, res, next) => {
 	const updatedDesc = req.body.description; // 수정된 상품 설명
 
 	Product.findById(prodId) // 상품 ID로 상품을 찾음
-		.then((product) => {
-			// 상품 목록을 가져옴
+		.then((product) => {			// 상품 목록을 가져옴
+			if(product.userId.toString() !== req.user._id.toString()) {	// 사용자 ID가 일치하지 않으면
+				return res.redirect('/');
+			}
 			product.title = updatedTitle; // 상품명 수정
 			product.price = updatedPrice; // 가격 수정
 			product.imageUrl = updatedImageUrl; // 이미지 URL 수정
 			product.description = updatedDesc; // 상품 설명 수정
-			return product.save(); // 상품 저장
-		})
-		.then((result) => {
-			console.log('상품 수정 완료!');
-			res.redirect('/admin/products');
+			return product
+				.save() // 상품 저장
+				.then((result) => {
+					console.log('상품 수정 완료!');
+					res.redirect('/admin/products');
+				});
 		})
 		.catch((err) => console.log(err));
 };
 
 // 상품 목록 페이지 라우팅
 exports.getProducts = (req, res, next) => {
-	Product.find() // 모든 상품을 가져옴
-		// .populate('userId')                     // userId 필드를 참조하여 User 모델의 정보를 가져옴
-		.then((products) => {
-			// 상품 목록을 가져옴
-			//console.log(products);
-			res.render('admin/products', {
-				// products.ejs 렌더링
-				prods: products, // 상품 목록
-				pageTitle: '관리자 상품', // 페이지 제목
-				path: '/admin/products', // 현재 경로
+	Product.find({userId: req.user._id}) 	// 로그인 한 사용자와 관련된 모든 상품을 가져옴
+		// .populate('userId')          	// userId 필드를 참조하여 User 모델의 정보를 가져옴
+		.then((products) => {				// 상품 목록을 가져옴						
+			res.render('admin/products', {	
+				prods: products, 			// 상품 목록
+				pageTitle: '관리자 상품', 	// 페이지 제목
+				path: '/admin/products', 	// 현재 경로
 			});
 		})
 		.catch((err) => console.log(err));
@@ -101,7 +101,7 @@ exports.getProducts = (req, res, next) => {
 // 상품 삭제
 exports.postDeleteProduct = (req, res, next) => {
 	const prodId = req.body.productId; // 상품 ID
-	Product.findByIdAndDelete(prodId) // 상품 ID로 상품을 찾음
+	Product.deleteOne({_id: prodId, userId: req.user._id}) // 상품 ID와 사용자 ID로 상품을 찾아 삭제
 		.then(() => {
 			// 삭제 성공하면
 			console.log('상품 삭제');
