@@ -14,7 +14,7 @@ const flash = require('connect-flash'); // 플래시 미들웨어
 const errorController = require('./controllers/error'); // 에러 컨트롤러
 const User = require('./models/user'); // 사용자 모델
 
-figlet('Node  Server', function (err, data) {
+figlet('ki tae - node js', function (err, data) {
 	if (err) {
 		console.log('Something went wrong...');
 		console.dir(err);
