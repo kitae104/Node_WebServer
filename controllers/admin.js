@@ -1,3 +1,4 @@
+const { validationResult } = require('express-validator'); // express-validator
 const Product = require('../models/product'); // Product 모델 클래스를 가져옴
 
 // 상품 추가 페이지 라우팅
@@ -6,6 +7,9 @@ exports.getAddProduct = (req, res, next) => {
 		pageTitle: '상품 추가', // 페이지 제목
 		path: '/admin/add-product', // 현재 경로
 		editing: false, // 수정 여부
+		hasError: false, // 에러 여부
+		errorMessage: null, // 에러 메시지
+		validationErrors: [], // 검증 에러
 	});
 };
 
@@ -15,6 +19,25 @@ exports.postAddProduct = (req, res, next) => {
 	const imageUrl = req.body.imageUrl; // 이미지 URL
 	const price = req.body.price; // 상품 가격
 	const description = req.body.description; // 상품 설명
+	const errors = validationResult(req); // 검증 결과
+
+	if(!errors.isEmpty()) { // 에러가 있으면
+		console.log(errors.array());
+		return res.status(422).render('admin/edit-product', { // 상품 추가 페이지로 이동
+			pageTitle: '상품 추가', // 페이지 제목
+			path: '/admin/edit-product', // 현재 경로
+			editing: false, // 수정 여부
+			hasError: true, // 에러 여부
+			product: {
+				title: title,
+				imageUrl: imageUrl,
+				price: price,
+				description: description,
+			},
+			errorMessage: errors.array()[0].msg, // 에러 메시지
+			validationErrors: errors.array(), // 검증 에러
+		});
+	}
 	const product = new Product({
 		// Product 모델 인스턴스 생성
 		title: title,
@@ -52,6 +75,9 @@ exports.getEditProduct = (req, res, next) => {
 				path: '/admin/edit-product', // 현재 경로
 				editing: editMode,
 				product: product,
+				hasError: false,
+				errorMessage: null,
+				validationErrors: []
 			});
 		})
 		.catch((err) => console.log(err));
@@ -65,14 +91,34 @@ exports.postEditProduct = (req, res, next) => {
 	const updatedImageUrl = req.body.imageUrl; // 수정된 이미지 URL
 	const updatedDesc = req.body.description; // 수정된 상품 설명
 
+	const errors = validationResult(req);
+
+	if (!errors.isEmpty()) {
+		return res.status(422).render('admin/edit-product', {
+			pageTitle: 'Edit Product',		// 페이지 제목
+			path: '/admin/edit-product',	// 현재 경로
+			editing: true,					// 수정 여부
+			hasError: true,					// 에러 여부
+			product: {
+				title: updatedTitle,		// 수정된 상품명
+				imageUrl: updatedImageUrl,	// 수정된 이미지 URL
+				price: updatedPrice,		// 수정된 상품 가격
+				description: updatedDesc,	// 수정된 상품 설명		
+				_id: prodId					// 상품 ID
+			},
+			errorMessage: errors.array()[0].msg,
+			validationErrors: errors.array()
+		});
+	}
+
 	Product.findById(prodId) // 상품 ID로 상품을 찾음
 		.then((product) => {			// 상품 목록을 가져옴
 			if(product.userId.toString() !== req.user._id.toString()) {	// 사용자 ID가 일치하지 않으면
 				return res.redirect('/');
 			}
 			product.title = updatedTitle; // 상품명 수정
-			product.price = updatedPrice; // 가격 수정
 			product.imageUrl = updatedImageUrl; // 이미지 URL 수정
+			product.price = updatedPrice; // 가격 수정
 			product.description = updatedDesc; // 상품 설명 수정
 			return product
 				.save() // 상품 저장

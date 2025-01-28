@@ -8,7 +8,18 @@ const User = require('../models/user');                 // User 모델 가져오
 
 router.get('/login', authController.getLogin);          // 로그인 페이지 라우팅
 
-router.post('/login', authController.postLogin);        // 로그인 처리 라우팅
+router.post('/login', 
+[
+    check('email')                   // 회원가입 처리 라우팅
+        .isEmail()                                              // 이메일 형식 검증
+        .withMessage("유효한 이메일을 입력하세요.")
+        .normalizeEmail(),                                      // 이메일 주소 정규화
+    body('password','비밀번호는 최소 4자 이상이어야 합니다.')
+        .isLength({ min: 4 })            
+        .isAlphanumeric()
+        .trim(),                                                // 비밀번호 공백 제거
+],
+authController.postLogin);        // 로그인 처리 라우팅
 
 router.post('/logout', authController.postLogout);      // 로그아웃 처리 라우팅
 
@@ -27,11 +38,14 @@ router.post('/signup',
                             return Promise.reject('이미 사용중인 이메일입니다.');
                         }
                     });
-            }), 
+            })
+            .normalizeEmail(), 
         body('password','비밀번호는 최소 4자 이상이어야 합니다.')
             .isLength({ min: 4 })            
-            .isAlphanumeric(),
+            .isAlphanumeric()
+            .trim(),
         body('confirmPassword')
+            .trim()
             .custom((value, { req }) => {
                 if (value !== req.body.password) {
                     throw new Error('비밀번호가 일치하지 않습니다.');

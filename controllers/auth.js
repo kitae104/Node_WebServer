@@ -36,6 +36,7 @@ exports.getLogin = (req, res, next) => {
 			email: '',
 			password: ''
 		},
+		validationErrors: [],
 	});
 };
 
@@ -47,6 +48,7 @@ exports.postLogin = (req, res, next) => {
 	const password = req.body.password; // 비밀번호
 	
 	const errors = validationResult(req); 				// 검증 결과
+	console.log(errors.array());
 	if (!errors.isEmpty()) { 							// 에러가 있으면
 		return res.status(422).render('auth/login', { 	// 로그인 페이지로 이동
 			path: '/login',
@@ -54,24 +56,30 @@ exports.postLogin = (req, res, next) => {
 			errorMessage: errors.array()[0].msg, 		// 에러 메시지
 			oldInput: { 								// 입력한 이전 정보
 				email: email, 
-				password: password, 
-				confirmPassword: confirmPassword 
+				password: password, 				
 			}, 
+			validationErrors: errors.array(),
 		});
 	}
 	
 	User.findOne({ email: email }) // 이메일로 사용자를 찾음
 		.then((user) => {
-			if (!user) {
-				// 사용자가 없으면
-				req.flash('error', '이메일이나 비밀번호가 일치하지 않습니다.'); // 에러 메시지
-				return res.redirect('/login'); // 로그인 페이지로 이동
+			if (!user) {					// 사용자가 없으면				
+				return res.status(422).render('auth/login', { 	// 로그인 페이지로 이동
+					path: '/login',
+					pageTitle: '로그인',
+					errorMessage: '이메일이나 비밀번호가 일치하지 않습니다.', // 에러 메시지
+					oldInput: { 								// 입력한 이전 정보
+						email: email, 
+						password: password, 				
+					}, 
+					validationErrors: [],
+				});
 			}
 			bcrypt
 				.compare(password, user.password) // 비밀번호 비교
 				.then((doMatch) => {
-					if (doMatch) {
-						// 비밀번호가 일치하면
+					if (doMatch) {						// 비밀번호가 일치하면
 						req.session.isLoggedIn = true; // 세션에 인증 정보를 저장
 						req.session.user = user; // 사용자 정보를 세션에 저장
 						return req.session.save((err) => {
@@ -79,7 +87,16 @@ exports.postLogin = (req, res, next) => {
 							res.redirect('/'); // 홈페이지로 이동
 						});
 					}
-					res.redirect('/login'); // 비밀번호가 일치하지 않으면 로그인 페이지로 이동
+					return res.status(422).render('auth/login', {
+						path: '/login',
+						pageTitle: '로그인',
+						errorMessage: '이메일이나 비밀번호가 일치하지 않습니다.',
+						oldInput: {
+							email: email,
+							password: password
+						},
+						validationErrors: []
+					});
 				})
 				.catch((err) => {
 					console.log(err);
