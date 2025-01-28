@@ -4,7 +4,7 @@ const { check, body } = require('express-validator');   // express-validator/che
 
 const router = express.Router();                        // Router 객체 생성
 const authController = require('../controllers/auth');  // authController 모듈 가져오기 
-
+const User = require('../models/user');                 // User 모델 가져오기
 
 router.get('/login', authController.getLogin);          // 로그인 페이지 라우팅
 
@@ -20,10 +20,13 @@ router.post('/signup',
             .isEmail()
             .withMessage("유효한 이메일을 입력하세요.")
             .custom((value, { req }) => {
-                if (value === 'admin@test.com') {
-                    throw new Error('해당 이메일은 사용할 수 없습니다.');
-                }
-                return true;
+                return User
+                    .findOne({ email: value }) // 이메일로 사용자를 찾음
+                    .then(userDoc => {
+                        if (userDoc) {
+                            return Promise.reject('이미 사용중인 이메일입니다.');
+                        }
+                    });
             }), 
         body('password','비밀번호는 최소 4자 이상이어야 합니다.')
             .isLength({ min: 4 })            

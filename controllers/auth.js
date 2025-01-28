@@ -32,6 +32,10 @@ exports.getLogin = (req, res, next) => {
 		path: '/login', // 로그인 페이지로 이동
 		pageTitle: '로그인', // 페이지 타이틀
 		errorMessage: message, // 에러 메시지
+		oldInput: {
+			email: '',
+			password: ''
+		},
 	});
 };
 
@@ -41,6 +45,21 @@ const USER_ID = process.env.USER_ID;
 exports.postLogin = (req, res, next) => {
 	const email = req.body.email; // 이메일
 	const password = req.body.password; // 비밀번호
+	
+	const errors = validationResult(req); 				// 검증 결과
+	if (!errors.isEmpty()) { 							// 에러가 있으면
+		return res.status(422).render('auth/login', { 	// 로그인 페이지로 이동
+			path: '/login',
+			pageTitle: '로그인',
+			errorMessage: errors.array()[0].msg, 		// 에러 메시지
+			oldInput: { 								// 입력한 이전 정보
+				email: email, 
+				password: password, 
+				confirmPassword: confirmPassword 
+			}, 
+		});
+	}
+	
 	User.findOne({ email: email }) // 이메일로 사용자를 찾음
 		.then((user) => {
 			if (!user) {
@@ -91,6 +110,12 @@ exports.getSignup = (req, res, next) => {
 		path: '/signup',
 		pageTitle: '회원가입',
 		errorMessage: message,
+		oldInput: { 
+			email: '', 
+			password: '', 
+			confirmPassword: '' 
+		},
+		validationErrors: [],
 	});
 };
 
@@ -98,7 +123,6 @@ exports.getSignup = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
 	const email = req.body.email;
 	const password = req.body.password;
-	const confirmPassword = req.body.confirmPassword;
 
 	const errors = validationResult(req); 	// 검증 결과
 	if (!errors.isEmpty()) {		 		// 에러가 있으면
@@ -106,44 +130,38 @@ exports.postSignup = (req, res, next) => {
 			path: '/signup',
 			pageTitle: '회원가입',
 			errorMessage: errors.array()[0].msg,		// 에러 메시지
+			oldInput: {
+				email: email,
+				password: password,
+				confirmPassword: req.body.confirmPassword
+			},
+			validationErrors: errors.array(),
 		});
 	}
 
-	User.findOne({ email: email }) // 이메일로 사용자를 찾음
-		.then((userDoc) => {
-			// 사용자를 찾으면
-			if (userDoc) {
-				// 사용자가 있으면
-				req.flash(
-					'error',
-					'이미 사용중인 이메일입니다. 다른 이메일을 사용하세요.'
-				); // 에러 메시지
-				return res.redirect('/signup'); // 회원가입 페이지로 이동
-			}
-			return bcrypt
-				.hash(password, 12)
-				.then((hashedPassword) => {
-					const user = new User({
-						// 사용자가 없으면
-						email: email, // 사용자 정보 생성
-						password: hashedPassword,
-						cart: { items: [] }, // 장바구니 정보
-					});
-					return user.save(); // 사용자 정보를 저장
-				})
-				.then((result) => {
-					res.redirect('/login'); // 로그인 페이지로 이동
-					return transporter
-						.sendMail({
-							from: 'kktpsh@naver.com', // 발신 이메일
-							to: email, // 수신 이메일
-							subject: '회원 가입 성공!', // 이메일 제목
-							html: '<h1>기태네 쇼핑몰 회원 가입에 성공하셨습니다!</h1>', // 이메일 본문
-						})
-						.catch((err) => console.log(err));
-				});
+	bcrypt
+		.hash(password, 12)
+		.then((hashedPassword) => {
+			const user = new User({
+				// 사용자가 없으면
+				email: email, // 사용자 정보 생성
+				password: hashedPassword,
+				cart: { items: [] }, // 장바구니 정보
+			});
+			return user.save(); // 사용자 정보를 저장
 		})
-		.catch((err) => console.log(err));
+		.then((result) => {
+			res.redirect('/login'); // 로그인 페이지로 이동
+			return transporter
+				.sendMail({
+					from: 'kktpsh@naver.com', // 발신 이메일
+					to: email, // 수신 이메일
+					subject: '회원 가입 성공!', // 이메일 제목
+					html: '<h1>기태네 쇼핑몰 회원 가입에 성공하셨습니다!</h1>', // 이메일 본문
+				})
+				.catch((err) => console.log(err));
+		})
+		.catch((err) => console.log(err));	
 };
 
 // 비밀번호 재설정
