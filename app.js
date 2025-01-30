@@ -44,24 +44,28 @@ const store = new MongoDBStore({
 	collection: 'sessions',
 });
 
+store.on('error', function(error) {
+    console.log('Session Store Error:', error);
+});
+
 //==========================================================================================
 // 미들웨어 등록(use)
 //==========================================================================================
 const csrfProtection = csrf(); // CSRF 보안 미들웨어 생성
-// app.use(cors());
+app.use(cors());
 
 const fileStorage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		cb(null, 'images'); // 파일 저장 경로
 	},
 	filename: (req, file, cb) => {
-		cb(null, new Date().toISOString() + '-' + file.originalname); // 파일명
+		cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname); // 파일명
 	},
 });
 
 const fileFilter = (req, file, cb) => {
 	if (
-		file.Date('image/png') ||
+		file.mimetype === 'image/png' ||
 		file.mimetype === 'image/jpg' ||
 		file.mimetype === 'image/jpeg'
 	) {
@@ -70,6 +74,7 @@ const fileFilter = (req, file, cb) => {
 		cb(null, false); // 파일 거부
 	}
 };
+
 //==========================================================================================
 // 뷰 엔진 설정
 //==========================================================================================
@@ -90,6 +95,7 @@ app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
 // app.use(multer({ dest: 'images' }).single('image')); // public/images 폴더에 이미지 저장
 
 app.use(express.static(path.join(__dirname, 'public'))); // 정적 파일 미들웨어 등록
+
 app.use(
 	// 세션 미들웨어 등록
 	session({
@@ -113,8 +119,7 @@ app.use((req, res, next) => {
 //사용자 정보를 미들웨어로 등록
 app.use((req, res, next) => {
 	if (!req.session.user) {
-		// 세션에 사용자 정보가 없으면
-		return next(); // 다음 미들웨어로 이동
+		return next();
 	}
 	User.findById(req.session.user._id) // 세션에 저장된 사용자 ID로 사용자를 찾음
 		.then((user) => {
@@ -129,11 +134,6 @@ app.use((req, res, next) => {
 		});
 });
 
-app.use((req, res, next) => {
-	console.log('Middleware check:', req.user);
-	next();
-});
-
 app.use('/admin', adminRoutes); // admin 라우터 등록
 app.use(shopRoutes); // shop 라우터 등록
 app.use(authRoutes); // auth 라우터 등록
@@ -142,16 +142,22 @@ app.get('/500', errorController.get500); // 500 에러 페이지
 
 app.use(errorController.get404); // 404 에러 페이지
 
+app.use((req, res, next) => {
+	console.log('Middleware check1:', req.user);
+	console.log('Middleware check2:', req.session.isLoggedIn);
+	next();
+});
+
 //=================================================================
 // 에러 처리 미들웨어 등록
 //=================================================================
-app.use((error, req, res, next) => {
-	res.status(500).render('500', {
-		pageTitle: '서버 오류',
-		path: '/500',
-		isAuthenticated: req.session.isLoggedIn,
-	});
-});
+// app.use((error, req, res, next) => {
+// 	res.status(500).render('500', {
+// 		pageTitle: '서버 오류',
+// 		path: '/500',
+// 		isAuthenticated: req.session.isLoggedIn,
+// 	});
+// });
 
 //=================================================================
 // MongoDB 연결

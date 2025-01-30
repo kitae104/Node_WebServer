@@ -15,11 +15,13 @@ exports.getAddProduct = (req, res, next) => {
 
 // 상품 추가
 exports.postAddProduct = (req, res, next) => {
+	console.log("postAddProduct 호출 =======================");
 	const title = req.body.title; // 상품명
 	const imageUrl = req.file; // 이미지 URL
 	const price = req.body.price; // 상품 가격
 	const description = req.body.description; // 상품 설명	
 	console.log(imageUrl); // 이미지 URL 출력
+	console.log(req.session.isLoggedIn); // 세션 출력
 	const errors = validationResult(req); // 검증 결과
 
 	if(!errors.isEmpty()) { // 에러가 있으면
@@ -39,8 +41,9 @@ exports.postAddProduct = (req, res, next) => {
 			validationErrors: errors.array(), // 검증 에러
 		});
 	}
-	const product = new Product({
-		// Product 모델 인스턴스 생성
+	
+	// Product 모델 인스턴스 생성
+	const product = new Product({		
 		title: title,
 		price: price,
 		description: description,

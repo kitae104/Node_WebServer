@@ -25,8 +25,7 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
 	const prodId = req.params.productId; // URL로부터 productId를 가져옴
 	Product.findById(prodId) // 상품 ID로 상품을 찾음
-		.then((product) => {
-			// 상품 목록을 가져옴
+		.then((product) => {			// 상품 목록을 가져옴
 			res.render('shop/product-detail', {
 				product: product,
 				pageTitle: product.title,
