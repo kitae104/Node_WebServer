@@ -14,7 +14,11 @@ exports.getProducts = (req, res, next) => {
 				path: '/products', // 현재 경로
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 상품 상세 페이지
@@ -29,7 +33,11 @@ exports.getProduct = (req, res, next) => {
 				path: '/products',
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 홈 페이지
@@ -44,7 +52,11 @@ exports.getIndex = (req, res, next) => {
 				path: '/', // 현재 경로
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 exports.getCart = (req, res, next) => {
@@ -58,7 +70,11 @@ exports.getCart = (req, res, next) => {
 				products: products,
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 카트에 상품 추가
@@ -72,7 +88,11 @@ exports.postCart = (req, res, next) => {
 			//console.log(result);
 			res.redirect('/cart'); // 카트 페이지로 리다이렉트
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 카트에서 상품 삭제
@@ -83,7 +103,11 @@ exports.postCartDeleteProduct = (req, res, next) => {
 		.then((result) => {
 			res.redirect('/cart'); // 카트 페이지로 리다이렉트
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 주문 페이지
@@ -96,7 +120,11 @@ exports.getOrders = (req, res, next) => {
 				orders: orders,
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 주문 추가
@@ -126,7 +154,11 @@ exports.postOrder = (req, res, next) => {
 		.then(() => {
 			res.redirect('/orders'); // 주문 페이지로 리다이렉트
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 exports.getCheckout = (req, res, next) => {

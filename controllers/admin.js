@@ -52,7 +52,12 @@ exports.postAddProduct = (req, res, next) => {
 			console.log('상품 생성');
 			res.redirect('/admin/products'); // 상품 목록 페이지로 리다이렉트
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			// res.redirect('/500'); 		// 500 에러 페이지로 리다이렉트
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 상품 수정 페이지 라우팅
@@ -65,7 +70,7 @@ exports.getEditProduct = (req, res, next) => {
 	const prodId = req.params.productId; // URL로부터 productId를 가져옴
 	Product.findById(prodId) // 상품 ID로 상품을 찾음
 		.then((product) => {
-			// 상품 목록을 가져옴
+			//throw new Error('Dummy'); // 강제 에러 발생			
 			if (!product) {
 				// 상품이 없으면
 				return res.redirect('/'); // 홈으로 리다이렉트
@@ -80,7 +85,11 @@ exports.getEditProduct = (req, res, next) => {
 				validationErrors: []
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 상품 수정
@@ -127,7 +136,11 @@ exports.postEditProduct = (req, res, next) => {
 					res.redirect('/admin/products');
 				});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 상품 목록 페이지 라우팅
@@ -141,7 +154,11 @@ exports.getProducts = (req, res, next) => {
 				path: '/admin/products', 	// 현재 경로
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 상품 삭제
@@ -153,5 +170,9 @@ exports.postDeleteProduct = (req, res, next) => {
 			console.log('상품 삭제');
 			res.redirect('/admin/products'); // 상품 목록 페이지로 리다이렉트
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };

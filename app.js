@@ -14,6 +14,9 @@ const flash = require('connect-flash'); // 플래시 미들웨어
 const errorController = require('./controllers/error'); // 에러 컨트롤러
 const User = require('./models/user'); // 사용자 모델
 
+//==========================================================================================
+// figlet을 이용한 콘솔 로고 출력
+//==========================================================================================
 figlet('ki tae - node js', function (err, data) {
 	if (err) {
 		console.log('Something went wrong...');
@@ -23,23 +26,32 @@ figlet('ki tae - node js', function (err, data) {
 	console.log(data);
 });
 
+//==========================================================================================
+// Express 앱 생성
+//==========================================================================================
 const app = express();
 const PORT = process.env.PORT;
 const MONGODB_URI = process.env.MONGODB_URI;
 const USER_ID = process.env.USER_ID;
 const SECRET = process.env.SECRET_KEY;
 
-const store = new MongoDBStore({
-	// MongoDB 세션 저장소 생성
+//==========================================================================================
+// MongoDB 세션 저장소 생성
+//==========================================================================================
+const store = new MongoDBStore({	
 	uri: MONGODB_URI,
 	collection: 'sessions',
 });
 
-const csrfProtection = csrf(); // CSRF 보안 미들웨어 생성
-
+//==========================================================================================
+// 뷰 엔진 설정
+//==========================================================================================
 app.set('view engine', 'ejs'); // ejs 템플릿 엔진 설정
 app.set('views', 'views'); // views 폴더 설정
 
+//==========================================================================================
+// 라우터 등록
+//==========================================================================================
 const adminRoutes = require('./routes/admin'); // 관리자 라우터
 const shopRoutes = require('./routes/shop'); // 상품 라우터
 const authRoutes = require('./routes/auth'); // 인증 라우터
@@ -47,15 +59,15 @@ const authRoutes = require('./routes/auth'); // 인증 라우터
 //==========================================================================================
 // 미들웨어 등록(use)
 //==========================================================================================
+const csrfProtection = csrf(); // CSRF 보안 미들웨어 생성
 app.use(cors());
 
 app.use(bodyParser.json()); // body-parser 미들웨어 등록
 app.use(bodyParser.urlencoded({ extended: false })); // body-parser 미들웨어 등록
 
 app.use(express.static(path.join(__dirname, 'public'))); // 정적 파일 미들웨어 등록
-app.use(
-	session({
-		// 세션 미들웨어 등록
+app.use(												// 세션 미들웨어 등록	
+	session({		
 		secret: SECRET, // 세션 암호화 키
 		resave: false, // 세션을 항상 저장할지 여부
 		saveUninitialized: false, // 초기화되지 않은 세션을 저장소에 저장할지 여부
@@ -63,8 +75,15 @@ app.use(
 	})
 );
 
-app.use(csrfProtection); 	// CSRF 보안 미들웨어 등록
-app.use(flash()); 			// 플래시 미들웨어 등록
+app.use(csrfProtection); // CSRF 보안 미들웨어 등록
+app.use(flash()); // 플래시 미들웨어 등록
+
+// 모든 요청에 대한 CSRF 토큰을 뷰로 전달
+app.use((req, res, next) => {
+	res.locals.isAuthenticated = req.session.isLoggedIn; // 사용자 인증 여부를 뷰로 전달
+	res.locals.csrfToken = req.csrfToken(); // CSRF 토큰을 뷰로 전달
+	next();
+});
 
 //사용자 정보를 미들웨어로 등록
 app.use((req, res, next) => {
@@ -74,25 +93,39 @@ app.use((req, res, next) => {
 	}
 	User.findById(req.session.user._id) // 세션에 저장된 사용자 ID로 사용자를 찾음
 		.then((user) => {
+			if(!user) {
+				return next();
+			}
 			req.user = user; // 사용자 정보를 req.user에 저장
 			next();
 		})
-		.catch((err) => console.log(err));
-});
-
-// 모든 요청에 대한 CSRF 토큰을 뷰로 전달
-app.use((req, res, next) => {
-	res.locals.isAuthenticated = req.session.isLoggedIn; // 사용자 인증 여부를 뷰로 전달
-	res.locals.csrfToken = req.csrfToken(); // CSRF 토큰을 뷰로 전달
-	next();
+		.catch((err) => {
+			next(new Error(err));	// 에러 발생 시 다음 미들웨어로 전달
+		});
 });
 
 app.use('/admin', adminRoutes); // admin 라우터 등록
 app.use(shopRoutes); // shop 라우터 등록
 app.use(authRoutes); // auth 라우터 등록
 
+app.get('/500', errorController.get500); // 500 에러 페이지
+
 app.use(errorController.get404); // 404 에러 페이지
 
+//=================================================================
+// 에러 처리 미들웨어 등록
+//=================================================================
+app.use((error, req, res, next) => {
+	res.status(500).render('500', {
+		pageTitle: '서버 오류',
+		path: '/500',
+		isAuthenticated: req.session.isLoggedIn,
+	});
+}); 
+
+//=================================================================
+// MongoDB 연결
+//=================================================================
 mongoose
 	.connect(MONGODB_URI)
 	.then((result) => {

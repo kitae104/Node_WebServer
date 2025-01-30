@@ -28,13 +28,13 @@ exports.getLogin = (req, res, next) => {
 	} else {
 		message = null; // 에러 메시지가 없으면 null
 	}
-	res.render('auth/login', {		
+	res.render('auth/login', {
 		path: '/login', // 로그인 페이지로 이동
 		pageTitle: '로그인', // 페이지 타이틀
 		errorMessage: message, // 에러 메시지
 		oldInput: {
 			email: '',
-			password: ''
+			password: '',
 		},
 		validationErrors: [],
 	});
@@ -46,40 +46,47 @@ const USER_ID = process.env.USER_ID;
 exports.postLogin = (req, res, next) => {
 	const email = req.body.email; // 이메일
 	const password = req.body.password; // 비밀번호
-	
-	const errors = validationResult(req); 				// 검증 결과
+
+	const errors = validationResult(req); // 검증 결과
 	console.log(errors.array());
-	if (!errors.isEmpty()) { 							// 에러가 있으면
-		return res.status(422).render('auth/login', { 	// 로그인 페이지로 이동
+	if (!errors.isEmpty()) {
+		// 에러가 있으면
+		return res.status(422).render('auth/login', {
+			// 로그인 페이지로 이동
 			path: '/login',
 			pageTitle: '로그인',
-			errorMessage: errors.array()[0].msg, 		// 에러 메시지
-			oldInput: { 								// 입력한 이전 정보
-				email: email, 
-				password: password, 				
-			}, 
+			errorMessage: errors.array()[0].msg, // 에러 메시지
+			oldInput: {
+				// 입력한 이전 정보
+				email: email,
+				password: password,
+			},
 			validationErrors: errors.array(),
 		});
 	}
-	
+
 	User.findOne({ email: email }) // 이메일로 사용자를 찾음
 		.then((user) => {
-			if (!user) {					// 사용자가 없으면				
-				return res.status(422).render('auth/login', { 	// 로그인 페이지로 이동
+			if (!user) {
+				// 사용자가 없으면
+				return res.status(422).render('auth/login', {
+					// 로그인 페이지로 이동
 					path: '/login',
 					pageTitle: '로그인',
 					errorMessage: '이메일이나 비밀번호가 일치하지 않습니다.', // 에러 메시지
-					oldInput: { 								// 입력한 이전 정보
-						email: email, 
-						password: password, 				
-					}, 
+					oldInput: {
+						// 입력한 이전 정보
+						email: email,
+						password: password,
+					},
 					validationErrors: [],
 				});
 			}
 			bcrypt
 				.compare(password, user.password) // 비밀번호 비교
 				.then((doMatch) => {
-					if (doMatch) {						// 비밀번호가 일치하면
+					if (doMatch) {
+						// 비밀번호가 일치하면
 						req.session.isLoggedIn = true; // 세션에 인증 정보를 저장
 						req.session.user = user; // 사용자 정보를 세션에 저장
 						return req.session.save((err) => {
@@ -90,12 +97,13 @@ exports.postLogin = (req, res, next) => {
 					return res.status(422).render('auth/login', {
 						path: '/login',
 						pageTitle: '로그인',
-						errorMessage: '이메일이나 비밀번호가 일치하지 않습니다.',
+						errorMessage:
+							'이메일이나 비밀번호가 일치하지 않습니다.',
 						oldInput: {
 							email: email,
-							password: password
+							password: password,
 						},
-						validationErrors: []
+						validationErrors: [],
 					});
 				})
 				.catch((err) => {
@@ -103,7 +111,11 @@ exports.postLogin = (req, res, next) => {
 					res.redirect('/login');
 				});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 로그아웃 처리
@@ -127,10 +139,10 @@ exports.getSignup = (req, res, next) => {
 		path: '/signup',
 		pageTitle: '회원가입',
 		errorMessage: message,
-		oldInput: { 
-			email: '', 
-			password: '', 
-			confirmPassword: '' 
+		oldInput: {
+			email: '',
+			password: '',
+			confirmPassword: '',
 		},
 		validationErrors: [],
 	});
@@ -141,16 +153,18 @@ exports.postSignup = (req, res, next) => {
 	const email = req.body.email;
 	const password = req.body.password;
 
-	const errors = validationResult(req); 	// 검증 결과
-	if (!errors.isEmpty()) {		 		// 에러가 있으면
-		return res.status(422).render('auth/signup', {	// 회원가입 페이지로 이동
+	const errors = validationResult(req); // 검증 결과
+	if (!errors.isEmpty()) {
+		// 에러가 있으면
+		return res.status(422).render('auth/signup', {
+			// 회원가입 페이지로 이동
 			path: '/signup',
 			pageTitle: '회원가입',
-			errorMessage: errors.array()[0].msg,		// 에러 메시지
+			errorMessage: errors.array()[0].msg, // 에러 메시지
 			oldInput: {
 				email: email,
 				password: password,
-				confirmPassword: req.body.confirmPassword
+				confirmPassword: req.body.confirmPassword,
 			},
 			validationErrors: errors.array(),
 		});
@@ -178,7 +192,11 @@ exports.postSignup = (req, res, next) => {
 				})
 				.catch((err) => console.log(err));
 		})
-		.catch((err) => console.log(err));	
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 // 비밀번호 재설정
@@ -228,7 +246,11 @@ exports.postReset = (req, res, next) => {
 					`,
 				});
 			})
-			.catch((err) => console.log(err));
+			.catch((err) => {
+				const error = new Error(err);	// 에러 객체 생성
+				error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+				return next(error);				// 다음 미들웨어로 에러 전달
+			});
 	});
 };
 
@@ -258,7 +280,11 @@ exports.getNewPassword = (req, res, next) => {
 				passwordToken: token, // 비밀번호 토큰
 			});
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
 
 exports.postNewPassword = (req, res, next) => {
@@ -288,5 +314,9 @@ exports.postNewPassword = (req, res, next) => {
 		.then((result) => {
 			res.redirect('/login'); // 로그인 페이지로 이동
 		})
-		.catch((err) => console.log(err));
+		.catch((err) => {
+			const error = new Error(err);	// 에러 객체 생성
+			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
+			return next(error);				// 다음 미들웨어로 에러 전달
+		});
 };
