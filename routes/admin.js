@@ -15,7 +15,6 @@ router.post('/add-product', [
         .isString()                     // 문자열 형식
         .isLength({ min: 3 })           // 최소 3자 이상
         .trim(),                        // 공백 제거
-    body('imageUrl').isURL(),           // URL 형식
     body('price').isInt(),              // 정수 형식
     body('description')
         .isLength({ min: 5, max: 400 }) // 최소 5자 이상, 최대 400자 이하

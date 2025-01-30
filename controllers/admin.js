@@ -16,9 +16,10 @@ exports.getAddProduct = (req, res, next) => {
 // 상품 추가
 exports.postAddProduct = (req, res, next) => {
 	const title = req.body.title; // 상품명
-	const imageUrl = req.body.imageUrl; // 이미지 URL
+	const imageUrl = req.file; // 이미지 URL
 	const price = req.body.price; // 상품 가격
-	const description = req.body.description; // 상품 설명
+	const description = req.body.description; // 상품 설명	
+	console.log(imageUrl); // 이미지 URL 출력
 	const errors = validationResult(req); // 검증 결과
 
 	if(!errors.isEmpty()) { // 에러가 있으면
@@ -53,7 +54,6 @@ exports.postAddProduct = (req, res, next) => {
 			res.redirect('/admin/products'); // 상품 목록 페이지로 리다이렉트
 		})
 		.catch((err) => {
-			// res.redirect('/500'); 		// 500 에러 페이지로 리다이렉트
 			const error = new Error(err);	// 에러 객체 생성
 			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
 			return next(error);				// 다음 미들웨어로 에러 전달

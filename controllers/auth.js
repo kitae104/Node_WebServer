@@ -121,7 +121,7 @@ exports.postLogin = (req, res, next) => {
 // 로그아웃 처리
 exports.postLogout = (req, res, next) => {
 	req.session.destroy((err) => {
-		console.log('logout:' + err);
+		console.log('logout:' + req.user);
 		res.redirect('/');
 	});
 };
