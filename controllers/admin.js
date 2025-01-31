@@ -17,11 +17,28 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
 	console.log("postAddProduct 호출 =======================");
 	const title = req.body.title; // 상품명
-	const imageUrl = req.file; // 이미지 URL
+	const image = req.file; // 이미지 파일
 	const price = req.body.price; // 상품 가격
 	const description = req.body.description; // 상품 설명	
-	console.log(imageUrl); // 이미지 URL 출력
+	console.log(image); // 이미지 URL 출력
 	console.log(req.session.isLoggedIn); // 세션 출력
+
+	if(!image) {
+		return res.status(422).render('admin/edit-product', { // 상품 추가 페이지로 이동
+			pageTitle: '상품 추가', // 페이지 제목
+			path: '/admin/edit-product', // 현재 경로
+			editing: false, // 수정 여부
+			hasError: true, // 에러 여부
+			product: {
+				title: title,				
+				price: price,
+				description: description,
+			},
+			errorMessage: '첨부된 파일이 이미지가 아닙니다.', // 에러 메시지
+			validationErrors: errors.array(), // 검증 에러
+		});
+	}
+
 	const errors = validationResult(req); // 검증 결과
 
 	if(!errors.isEmpty()) { // 에러가 있으면
@@ -29,7 +46,7 @@ exports.postAddProduct = (req, res, next) => {
 		return res.status(422).render('admin/edit-product', { // 상품 추가 페이지로 이동
 			pageTitle: '상품 추가', // 페이지 제목
 			path: '/admin/edit-product', // 현재 경로
-			editing: false, // 수정 여부
+			editing: false, // 상품 등록 페이지 
 			hasError: true, // 에러 여부
 			product: {
 				title: title,
@@ -42,6 +59,8 @@ exports.postAddProduct = (req, res, next) => {
 		});
 	}
 	
+	const imageUrl = image.path; // 이미지 URL
+
 	// Product 모델 인스턴스 생성
 	const product = new Product({		
 		title: title,
@@ -100,7 +119,7 @@ exports.postEditProduct = (req, res, next) => {
 	const prodId = req.body.productId; // 상품 ID
 	const updatedTitle = req.body.title; // 수정된 상품명
 	const updatedPrice = req.body.price; // 수정된 상품 가격
-	const updatedImageUrl = req.body.imageUrl; // 수정된 이미지 URL
+	const image = req.file; // 수정된 이미지 파일
 	const updatedDesc = req.body.description; // 수정된 상품 설명
 
 	const errors = validationResult(req);
@@ -109,11 +128,10 @@ exports.postEditProduct = (req, res, next) => {
 		return res.status(422).render('admin/edit-product', {
 			pageTitle: 'Edit Product',		// 페이지 제목
 			path: '/admin/edit-product',	// 현재 경로
-			editing: true,					// 수정 여부
+			editing: true,					// 상품 수정 페이지 
 			hasError: true,					// 에러 여부
 			product: {
-				title: updatedTitle,		// 수정된 상품명
-				imageUrl: updatedImageUrl,	// 수정된 이미지 URL
+				title: updatedTitle,		// 수정된 상품명				
 				price: updatedPrice,		// 수정된 상품 가격
 				description: updatedDesc,	// 수정된 상품 설명		
 				_id: prodId					// 상품 ID
@@ -128,10 +146,12 @@ exports.postEditProduct = (req, res, next) => {
 			if(product.userId.toString() !== req.user._id.toString()) {	// 사용자 ID가 일치하지 않으면
 				return res.redirect('/');
 			}
-			product.title = updatedTitle; // 상품명 수정
-			product.imageUrl = updatedImageUrl; // 이미지 URL 수정
+			product.title = updatedTitle; // 상품명 수정			
 			product.price = updatedPrice; // 가격 수정
 			product.description = updatedDesc; // 상품 설명 수정
+			if(image) { // 이미지 수정
+				product.imageUrl = image.path; // 이미지 URL 수정
+			}
 			return product
 				.save() // 상품 저장
 				.then((result) => {

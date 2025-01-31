@@ -11,11 +11,17 @@ const router = express.Router(); // Router 객체 생성
 router.get('/add-product', isAuth, adminController.getAddProduct); // 상품 추가 페이지 라우팅
 
 router.post(
-	'/add-products',
+	'/add-product',
 	[
-		body('title').isString().isLength({ min: 3 }).trim(),
-		body('price').isInt(),
-		body('description').isLength({ min: 5, max: 400 }).trim(),
+		body('title')
+			.isString()
+			.isLength({ min: 3 })
+			.trim(),
+		body('price')
+			.isInt(),
+		body('description')
+			.isLength({ min: 5, max: 400 })
+			.trim(),
 	],
 	isAuth,
 	adminController.postAddProduct
@@ -31,9 +37,9 @@ router.post(
 		body('title') // 상품 수정 처리 라우팅
 			.isString() // 문자열 형식
 			.isLength({ min: 3 }) // 최소 3자 이상
-			.trim(), // 공백 제거
-		body('imageUrl').isURL(), // URL 형식
-		body('price').isInt(), // 정수 형식
+			.trim(), // 공백 제거		
+		body('price')
+			.isInt(), // 정수 형식
 		body('description')
 			.isLength({ min: 5, max: 400 }) // 최소 5자 이상, 최대 400자 이하
 			.trim(), // 공백 제거

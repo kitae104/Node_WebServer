@@ -95,6 +95,7 @@ app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
 // app.use(multer({ dest: 'images' }).single('image')); // public/images 폴더에 이미지 저장
 
 app.use(express.static(path.join(__dirname, 'public'))); // 정적 파일 미들웨어 등록
+app.use('/images', express.static(path.join(__dirname, 'images'))); // 이미지 경로 설정
 
 app.use(
 	// 세션 미들웨어 등록
@@ -151,13 +152,13 @@ app.use((req, res, next) => {
 //=================================================================
 // 에러 처리 미들웨어 등록
 //=================================================================
-// app.use((error, req, res, next) => {
-// 	res.status(500).render('500', {
-// 		pageTitle: '서버 오류',
-// 		path: '/500',
-// 		isAuthenticated: req.session.isLoggedIn,
-// 	});
-// });
+app.use((error, req, res, next) => {
+	res.status(500).render('500', {
+		pageTitle: '서버 오류',
+		path: '/500',
+		isAuthenticated: req.session.isLoggedIn,
+	});
+});
 
 //=================================================================
 // MongoDB 연결
