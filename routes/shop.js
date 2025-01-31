@@ -23,6 +23,8 @@ router.post('/create-order', isAuth, shopController.postOrder); // 주문 추가
 
 router.get('/orders', isAuth, shopController.getOrders); // 주문 페이지 라우팅
 
+router.get('/orders/:orderId', isAuth, shopController.getInvoice); // 주문 페이지 라우팅
+
 // router.get('/checkout', isAuth, shopController.getCheckout); // 결제 페이지 라우팅
 
 module.exports = router; // router 객체를 모듈로 내보냄

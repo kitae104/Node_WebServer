@@ -1,3 +1,5 @@
+const fs = require('fs'); // 파일 시스템 모듈을 가져옴
+const path = require('path'); // 경로 모듈을 가져옴
 const Product = require('../models/product'); // Product 모델 클래스를 가져옴
 const Order = require('../models/order'); // Order 모델 클래스를 가져옴
 
@@ -164,5 +166,17 @@ exports.getCheckout = (req, res, next) => {
 	res.render('shop/checkout', {
 		path: '/checkout',
 		pageTitle: '체크 아웃',
+	});
+};
+
+exports.getInvoice = (req, res, next) => {
+	const orderId = req.params.orderId;
+	const invoiceName = 'invoice-' + orderId + '.pdf';
+	const invoicePath = path.join('data', 'invoices', invoiceName);
+	fs.readFile(invoicePath, (err, data) => {
+		if(err){
+			return next(err);
+		}
+		res.send(data);
 	});
 };
