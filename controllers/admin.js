@@ -1,4 +1,7 @@
+const mongoose = require('mongoose');
+const fileHelper = require('../util/file'); // fileHelper 모듈을 가져옴
 const { validationResult } = require('express-validator'); // express-validator
+
 const Product = require('../models/product'); // Product 모델 클래스를 가져옴
 
 // 상품 추가 페이지 라우팅
@@ -150,6 +153,7 @@ exports.postEditProduct = (req, res, next) => {
 			product.price = updatedPrice; // 가격 수정
 			product.description = updatedDesc; // 상품 설명 수정
 			if(image) { // 이미지 수정
+				fileHelper.deleteFile(product.imageUrl); // 기존 이미지 삭제
 				product.imageUrl = image.path; // 이미지 URL 수정
 			}
 			return product
@@ -187,7 +191,15 @@ exports.getProducts = (req, res, next) => {
 // 상품 삭제
 exports.postDeleteProduct = (req, res, next) => {
 	const prodId = req.body.productId; // 상품 ID
-	Product.deleteOne({_id: prodId, userId: req.user._id}) // 상품 ID와 사용자 ID로 상품을 찾아 삭제
+
+	Product.findById(prodId) // 상품 ID로 상품을 찾음
+		.then((product) => {
+			if (!product) { // 상품이 없으면
+				return next(new Error('상품을 찾을 수 없습니다.')); // 에러 처리
+			}
+			fileHelper.deleteFile(product.imageUrl); // 기존 이미지 삭제
+			return Product.deleteOne({_id: prodId, userId: req.user._id}); // 상품 ID와 사용자 ID로 상품을 찾아 삭제
+		})
 		.then(() => {
 			// 삭제 성공하면
 			console.log('상품 삭제');
@@ -197,5 +209,5 @@ exports.postDeleteProduct = (req, res, next) => {
 			const error = new Error(err);	// 에러 객체 생성
 			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
 			return next(error);				// 다음 미들웨어로 에러 전달
-		});
+		});				
 };

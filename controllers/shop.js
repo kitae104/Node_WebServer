@@ -197,7 +197,20 @@ exports.getInvoice = (req, res, next) => {
 			pdfDoc.pipe(fs.createWriteStream(invoicePath)); // 파일 스트림 생성
 			pdfDoc.pipe(res); // response 스트림 생성
 
-			pdfDoc.text('Hello World!'); // PDF 문서에 텍스트 추가
+			const fontPath = path.join('fonts', 'NANUMGOTHIC.ttf'); 
+            pdfDoc.font(fontPath);
+
+			pdfDoc.fontSize(26).text('주문서', {
+				underline: true,
+			});
+			pdfDoc.text('-----------------------');
+			order.products.forEach(prod => {
+				pdfDoc.text(prod.product.title + ' - ' + prod.quantity + ' x ' + prod.product.price + '원');
+			});
+			pdfDoc.text('-----------------------');
+			pdfDoc.fontSize(20).text('총 금액: ' + order.products.reduce((acc, prod) => {
+				return acc + prod.quantity * prod.product.price;
+			}, 0) + '원');			
 
 			pdfDoc.end(); // PDF 문서 종료		
 			
