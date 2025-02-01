@@ -1,5 +1,7 @@
 const fs = require('fs'); // 파일 시스템 모듈을 가져옴
 const path = require('path'); // 경로 모듈을 가져옴
+const PDFDocument = require('pdfkit'); // pdfkit 모듈을 가져옴
+
 const Product = require('../models/product'); // Product 모델 클래스를 가져옴
 const Order = require('../models/order'); // Order 모델 클래스를 가져옴
 
@@ -17,9 +19,9 @@ exports.getProducts = (req, res, next) => {
 			});
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -27,7 +29,8 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
 	const prodId = req.params.productId; // URL로부터 productId를 가져옴
 	Product.findById(prodId) // 상품 ID로 상품을 찾음
-		.then((product) => {			// 상품 목록을 가져옴
+		.then((product) => {
+			// 상품 목록을 가져옴
 			res.render('shop/product-detail', {
 				product: product,
 				pageTitle: product.title,
@@ -35,9 +38,9 @@ exports.getProduct = (req, res, next) => {
 			});
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -54,9 +57,9 @@ exports.getIndex = (req, res, next) => {
 			});
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -72,9 +75,9 @@ exports.getCart = (req, res, next) => {
 			});
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -90,9 +93,9 @@ exports.postCart = (req, res, next) => {
 			res.redirect('/cart'); // 카트 페이지로 리다이렉트
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -105,9 +108,9 @@ exports.postCartDeleteProduct = (req, res, next) => {
 			res.redirect('/cart'); // 카트 페이지로 리다이렉트
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -122,9 +125,9 @@ exports.getOrders = (req, res, next) => {
 			});
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -156,9 +159,9 @@ exports.postOrder = (req, res, next) => {
 			res.redirect('/orders'); // 주문 페이지로 리다이렉트
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			const error = new Error(err); // 에러 객체 생성
+			error.httpStatusCode = 500; // HTTP 상태 코드 설정
+			return next(error); // 다음 미들웨어로 에러 전달
 		});
 };
 
@@ -171,12 +174,33 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getInvoice = (req, res, next) => {
 	const orderId = req.params.orderId;
-	const invoiceName = 'invoice-' + orderId + '.pdf';
-	const invoicePath = path.join('data', 'invoices', invoiceName);
-	fs.readFile(invoicePath, (err, data) => {
-		if(err){
-			return next(err);
-		}
-		res.send(data);
-	});
+
+	Order.findById(orderId)
+		.then((order) => {
+			if (!order) {
+				return next(new Error('주문이 존재하지 않습니다.'));
+			}
+			if (order.user.userId.toString() !== req.user._id.toString()) {
+				return next(new Error('권한이 없습니다.'));
+			}
+			const invoiceName = 'invoice-' + orderId + '.pdf';
+			const invoicePath = path.join('data', 'invoices', invoiceName);
+
+			const pdfDoc = new PDFDocument(); // PDF 문서 생성			
+
+			res.setHeader('Content-Type', 'application/pdf');
+			res.setHeader(
+				'Content-Disposition',
+				'inline; filename="' + invoiceName + '"'
+			); // inline : 브라우저에서 열림, attachment : 다운로드
+
+			pdfDoc.pipe(fs.createWriteStream(invoicePath)); // 파일 스트림 생성
+			pdfDoc.pipe(res); // response 스트림 생성
+
+			pdfDoc.text('Hello World!'); // PDF 문서에 텍스트 추가
+
+			pdfDoc.end(); // PDF 문서 종료		
+			
+		})
+		.catch((err) => next(err));
 };

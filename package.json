@@ -27,6 +27,7 @@
         "node_web": "file:",
         "nodemailer": "^6.10.0",
         "nodemailer-sendgrid-transport": "^0.2.0",
+        "pdfkit": "^0.16.0",
         "sequelize": "^6.37.5"
     }
 }
