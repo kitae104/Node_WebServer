@@ -5,6 +5,8 @@ const PDFDocument = require('pdfkit'); // pdfkit 모듈을 가져옴
 const Product = require('../models/product'); // Product 모델 클래스를 가져옴
 const Order = require('../models/order'); // Order 모델 클래스를 가져옴
 
+const ITEMS_PER_PAGE = 2; // 페이지당 상품 수
+
 // 상품 목록 페이지
 exports.getProducts = (req, res, next) => {
 	Product.find() // 모든 상품을 가져옴
@@ -46,7 +48,11 @@ exports.getProduct = (req, res, next) => {
 
 // 홈 페이지
 exports.getIndex = (req, res, next) => {
+	const page = req.query.page; // URL로부터 page를 가져옴
+
 	Product.find() // 모든 상품을 가져옴
+		.skip((page - 1) * ITEMS_PER_PAGE) // 페이지당 상품 수만큼 건너뜀
+		.limit(ITEMS_PER_PAGE) // 페이지당 상품 수만큼 가져옴
 		.then((products) => {
 			// 상품 목록을 가져옴
 			res.render('shop/index', {
