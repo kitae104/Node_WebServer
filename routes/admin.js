@@ -48,6 +48,6 @@ router.post(
 	adminController.postEditProduct
 ); // 상품 수정
 
-router.post('/delete-product', isAuth, adminController.postDeleteProduct); // 상품 삭제
+router.delete('/product/:productId', isAuth, adminController.deleteProduct); // 상품 삭제
 
 module.exports = router; // Router 객체를 모듈로 내보냄

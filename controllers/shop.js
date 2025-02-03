@@ -9,22 +9,35 @@ const ITEMS_PER_PAGE = 2; // 페이지당 상품 수
 
 // 상품 목록 페이지
 exports.getProducts = (req, res, next) => {
-	Product.find() // 모든 상품을 가져옴
-		.then((products) => {
-			// 상품 목록을 가져옴
-			// console.log(products);
+	const page = +req.query.page || 1; // URL로부터 page를 가져옴(+ : 문자열을 숫자로 변환)
+	let totalItems; // 상품 수를 저장할 변수
+
+	Product.find()
+		.countDocuments() // 상품 수를 가져옴
+		.then(numProducts => {
+			totalItems = numProducts; // 상품 수를 저장
+			return Product.find() // 모든 상품을 가져옴
+				.skip((page - 1) * ITEMS_PER_PAGE) // 페이지당 상품 수만큼 건너뜀
+				.limit(ITEMS_PER_PAGE) // 페이지당 상품 수만큼 가져옴
+		})
+		.then((products) => {	// 상품 목록을 가져옴			
 			res.render('shop/product-list', {
-				// product-list.ejs 렌더링
 				prods: products, // 상품 목록
-				pageTitle: '모든 상품 리스트', // 페이지 제목
+				pageTitle: '상품 리스트', // 페이지 제목
 				path: '/products', // 현재 경로
+				currentPage: page, // 현재 페이지
+				hasNextPage: ITEMS_PER_PAGE * page < totalItems, // 다음 페이지가 있는지
+				hasPreviousPage: page > 1, // 이전 페이지가 있는지
+				nextPage: page + 1, // 다음 페이지
+				previousPage: page - 1, // 이전 페이지
+				lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE), // 마지막 페이지
 			});
 		})
 		.catch((err) => {
 			const error = new Error(err); // 에러 객체 생성
 			error.httpStatusCode = 500; // HTTP 상태 코드 설정
 			return next(error); // 다음 미들웨어로 에러 전달
-		});
+		});			
 };
 
 // 상품 상세 페이지
@@ -48,25 +61,35 @@ exports.getProduct = (req, res, next) => {
 
 // 홈 페이지
 exports.getIndex = (req, res, next) => {
-	const page = req.query.page; // URL로부터 page를 가져옴
+	const page = +req.query.page || 1; // URL로부터 page를 가져옴(+ : 문자열을 숫자로 변환)
+	let totalItems; // 상품 수를 저장할 변수
 
-	Product.find() // 모든 상품을 가져옴
-		.skip((page - 1) * ITEMS_PER_PAGE) // 페이지당 상품 수만큼 건너뜀
-		.limit(ITEMS_PER_PAGE) // 페이지당 상품 수만큼 가져옴
-		.then((products) => {
-			// 상품 목록을 가져옴
+	Product.find()
+		.countDocuments() // 상품 수를 가져옴
+		.then(numProducts => {
+			totalItems = numProducts; // 상품 수를 저장
+			return Product.find() // 모든 상품을 가져옴
+				.skip((page - 1) * ITEMS_PER_PAGE) // 페이지당 상품 수만큼 건너뜀
+				.limit(ITEMS_PER_PAGE) // 페이지당 상품 수만큼 가져옴
+		})
+		.then((products) => {	// 상품 목록을 가져옴			
 			res.render('shop/index', {
-				// index.ejs 렌더링
 				prods: products, // 상품 목록
 				pageTitle: '쇼핑몰', // 페이지 제목
 				path: '/', // 현재 경로
+				currentPage: page, // 현재 페이지
+				hasNextPage: ITEMS_PER_PAGE * page < totalItems, // 다음 페이지가 있는지
+				hasPreviousPage: page > 1, // 이전 페이지가 있는지
+				nextPage: page + 1, // 다음 페이지
+				previousPage: page - 1, // 이전 페이지
+				lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE), // 마지막 페이지
 			});
 		})
 		.catch((err) => {
 			const error = new Error(err); // 에러 객체 생성
 			error.httpStatusCode = 500; // HTTP 상태 코드 설정
 			return next(error); // 다음 미들웨어로 에러 전달
-		});
+		});	
 };
 
 exports.getCart = (req, res, next) => {

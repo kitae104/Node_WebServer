@@ -28,6 +28,7 @@
                     </article>
                 <% } %>
             </div>
+            <%- include('../includes/pagination.ejs', {currentPage:currentPage, previousPage:previousPage, lastPage:lastPage, nextPage:nextPage}) %>
         <% } else { %>
             <h1>상품을 찾을 수 없습니다!</h1>
         <% } %>

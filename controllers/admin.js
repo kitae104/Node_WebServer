@@ -189,8 +189,8 @@ exports.getProducts = (req, res, next) => {
 };
 
 // 상품 삭제
-exports.postDeleteProduct = (req, res, next) => {
-	const prodId = req.body.productId; // 상품 ID
+exports.deleteProduct = (req, res, next) => {
+	const prodId = req.params.productId; // 상품 ID
 
 	Product.findById(prodId) // 상품 ID로 상품을 찾음
 		.then((product) => {
@@ -203,11 +203,9 @@ exports.postDeleteProduct = (req, res, next) => {
 		.then(() => {
 			// 삭제 성공하면
 			console.log('상품 삭제');
-			res.redirect('/admin/products'); // 상품 목록 페이지로 리다이렉트
+			res.status(200).json({message: '성공적으로 삭제되었습니다.'}); // JSON 응답
 		})
 		.catch((err) => {
-			const error = new Error(err);	// 에러 객체 생성
-			error.httpStatusCode = 500;		// HTTP 상태 코드 설정
-			return next(error);				// 다음 미들웨어로 에러 전달
+			res.status(500).json({message: '상품 삭제에 실패했습니다.'}); // JSON 응답
 		});				
 };
